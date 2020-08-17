@@ -23,7 +23,7 @@ def pos_to_int(pos):
 def get_legal_position(game_state):
     legal_positions = [p for p in zip(*np.where(game_state == 0))]
     pos = random.choice(legal_positions)
-    return (pos[0] * config.SNAKE_SIZE, pos[1] * config.SNAKE_SIZE)
+    return [pos[0] * config.SNAKE_SIZE, pos[1] * config.SNAKE_SIZE]
 
 
 
