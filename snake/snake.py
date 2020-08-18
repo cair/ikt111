@@ -190,6 +190,14 @@ class SnakeGame():
             del self.snake[0]
 
 
+    def _check_quit_event(self, event):
+        if event.type == pygame.QUIT:
+            self._game_over(msg='Quitting...')
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                self._game_over(msg='Quitting...')
+
+
     def _is_stationary(self):
         if self.snake_delta_x == 0 and self.snake_delta_y == 0:
             return True
