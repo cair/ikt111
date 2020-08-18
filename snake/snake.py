@@ -39,12 +39,12 @@ class SnakeGame():
         self.snake_size = config.SNAKE_SIZE
 
 
-    def _display_message(self, msg, color=colors['blue'], pos=None):
-        message = self.font_style.render(msg, True, color)
-        if not pos:
-            pos = [self.width / 2.4, self.height / 2.4]
 
-        self.display.blit(message, pos)
+    def _display_message(self, msg, color=colors['blue']):
+        message = self.font_style.render(msg, True, color)
+        message_rect = message.get_rect(center=(self.width / 2, self.height / 2))
+
+        self.display.blit(message, message_rect)
         pygame.display.update()
         time.sleep(1)
 
