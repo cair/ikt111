@@ -40,12 +40,14 @@ class SnakeGame():
         self.snake_size = config.SNAKE_SIZE
 
 
-    def _display_message(self, msg, color, pos=None):
+    def _display_message(self, msg, color=colors['blue'], pos=None):
         message = self.font_style.render(msg, True, color)
         if not pos:
             pos = [self.width / 2.4, self.height / 2.4]
 
         self.display.blit(message, pos)
+        pygame.display.update()
+        time.sleep(1)
 
 
     def _load_image(self, img_path, colorkey=None):
@@ -54,6 +56,7 @@ class SnakeGame():
         if colorkey:
             image.set_colorkey(colorkey)
         return image
+
 
     def _draw_snake(self):
         # Determine correct image for snake head
@@ -148,6 +151,7 @@ class SnakeGame():
             
             self.display.blit(image, seg)
 
+
     def _draw_apple(self):
         image = self._load_image('gfx/apple_white.png')
         self.display.blit(image, self.apple)
@@ -169,17 +173,59 @@ class SnakeGame():
     
     def _check_if_apple_eaten(self):
         # TODO: Implement next
-        pass
+        if self.snake[-1] == self.apple:
+            self.apple = self._get_random_position()
+            self.snake_len += 1
 
 
     def _check_collision_with_self(self):
-        # TODO: Implement next
-        pass
+        if self.snake_len > 1:
+            for segment in self.snake[:-1]:
+                if self.snake[-1] == segment:
+                    self._game_over()
 
 
     def _check_out_of_bounds(self):
-        # TODO: Implement next
-        pass
+        snake_head = self.snake[-1]
+        if snake_head[0] >= self.width or snake_head[0] < 0 or snake_head[1] >= self.height or snake_head[1] < 0:
+            self._game_over()
+
+
+    def _check_win_condition(self):
+        # Check win condition
+        if not 0 in self.get_game_state():
+            self._game_won()
+
+
+    def _get_random_position(self):
+        if not self.snake and not self.apple:
+            return [utils.rand_p(self.width), 
+                    utils.rand_p(self.height)]
+        
+        legal_pos  = self._get_legal_position()
+        return legal_pos
+
+
+    def _get_legal_position(self):
+        legal_positions = [p for p in zip(*np.where(self.get_game_state() == 0))]
+        pos = random.choice(legal_positions)
+        return [pos[0] * self.snake_size, 
+                pos[1] * self.snake_size]
+
+
+    def _game_over(self, msg='You Lost'):
+        self._display_message(msg)
+        self._exit()
+
+
+    def _game_won(self, msg='You Won!'):
+        self._display_message(msg)
+        self._exit()
+
+
+    def _exit(self):
+        pygame.quit()
+        quit()
 
 
     def get_game_state(self):
@@ -200,26 +246,21 @@ class SnakeGame():
 
 
     def game_loop(self, use_ai=False):
-        game_over = False
-        msg = 'You lost'
-
-        self.snake = [[int(self.width / 2), int((self.height / 2)) + i * self.snake_size] 
-                    for i in range(self.snake_len)]
-
-        self.apple = utils.get_random_position(self.snake)
+        self.snake = [[int(self.width / 2), 
+                       int((self.height / 2)) + i * self.snake_size] 
+                       for i in range(self.snake_len)]
+        self.apple = self._get_random_position()
 
         self._update_display()
 
-        while not game_over:
-
+        while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    game_over = True
+                    self._game_over(msg='Quitting...')
                     break
-                
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        game_over = True
+                        self._game_over(msg='Quitting...')
                         break
                     if event.key == pygame.K_LEFT and self.snake_delta_x != self.snake_size:
                         self.snake_delta_x = -self.snake_size
@@ -244,12 +285,6 @@ class SnakeGame():
             
             # Move the snake by creating a 'new head'
             # at the new position
-            """
-            x, y = self.snake[-1]
-            x += self.snake_delta_x
-            y += self.snake_delta_y
-            snake_head = [x, y]
-            """
             snake_head = self.snake[-1].copy()
             snake_head[0] += self.snake_delta_x
             snake_head[1] += self.snake_delta_y
@@ -258,40 +293,13 @@ class SnakeGame():
             if len(self.snake) > self.snake_len:
                 del self.snake[0]
 
-            # Check if snake is outside the game board
-            #if x >= self.width or x < 0 or y >= self.height or y < 0:
-            if snake_head[0] >= self.width or snake_head[0] < 0 or snake_head[1] >= self.height or snake_head[1] < 0:
-                break
-
-            # Check win condition
-            game_state = self.get_game_state()
-            if not 0 in game_state:
-                msg = 'You won!'
-                break
-
-            # Check if snake has eaten the apple
-            # Don't remove the tail-end if true to allow growth
-            if snake_head == self.apple:
-                self.apple = utils.get_random_position(snake=self.snake)
-                self.snake_len += 1
-
-
-            # Check if snake has collided with itself:
-            if self.snake_len > 1:
-                for segment in self.snake[:-1]:
-                    if snake_head == segment:
-                        game_over = True
-
-            if not game_over:
-                self._update_display()
-                self.clock.tick(config.CLOCK_SPEED)
-
-        self._display_message(msg, colors['blue'])
-        pygame.display.update()
-        time.sleep(1)
-
-        pygame.quit()
-        quit()
+            self._check_if_apple_eaten()
+            self._check_out_of_bounds()
+            self._check_collision_with_self()
+            self._check_win_condition()
+            
+            self._update_display()
+            self.clock.tick(config.CLOCK_SPEED)
 
 if __name__ == '__main__':
     snake = SnakeGame()
