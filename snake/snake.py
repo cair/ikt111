@@ -38,6 +38,7 @@ class SnakeGame():
         self.snake_len  = config.SNAKE_LEN
         self.snake_size = config.SNAKE_SIZE
 
+        self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
 
     def _display_message(self, msg, color=colors['blue']):
