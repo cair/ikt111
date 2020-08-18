@@ -163,6 +163,23 @@ class SnakeGame():
         pygame.display.update()
 
     
+    def _set_direction(self, direction):
+        if direction == 'up' and self.snake_delta_y != self.snake_size:
+            self.snake_delta_y = -self.snake_size
+            self.snake_delta_x = 0
+        elif direction == 'down' and self.snake_delta_y != -self.snake_size:
+            self.snake_delta_y = self.snake_size
+            self.snake_delta_x = 0
+        elif direction == 'left' and self.snake_delta_x != self.snake_size:
+            self.snake_delta_x = -self.snake_size
+            self.snake_delta_y = 0
+        elif direction == 'right' and self.snake_delta_x != -self.snake_size:
+            self.snake_delta_x = self.snake_size
+            self.snake_delta_y = 0
+        else:
+            # Unknown move - do nothing
+            pass
+
     def _move_snake(self):
         snake_head = self.snake[-1].copy()
         snake_head[0] += self.snake_delta_x
