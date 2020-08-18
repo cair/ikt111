@@ -300,7 +300,3 @@ class SnakeGame():
             
             self._update_display()
             self.clock.tick(config.CLOCK_SPEED)
-
-if __name__ == '__main__':
-    snake = SnakeGame()
-    snake.game_loop()
