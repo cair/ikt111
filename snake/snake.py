@@ -198,6 +198,18 @@ class SnakeGame():
                 self._game_over(msg='Quitting...')
 
 
+    def _check_move_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                self._set_direction('left')
+            if event.key == pygame.K_RIGHT:
+                self._set_direction('right')
+            if event.key == pygame.K_UP:
+                self._set_direction('up')
+            if event.key == pygame.K_DOWN:
+                self._set_direction('down')
+
+
     def _is_stationary(self):
         if self.snake_delta_x == 0 and self.snake_delta_y == 0:
             return True
