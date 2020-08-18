@@ -303,36 +303,22 @@ class SnakeGame():
         self.apple = self._get_random_position()
         self._update_display()
 
+        # Game Loop
         while True:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self._game_over(msg='Quitting...')
-                    break
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        self._game_over(msg='Quitting...')
-                        break
-                    if event.key == pygame.K_LEFT and self.snake_delta_x != self.snake_size:
-                        self.snake_delta_x = -self.snake_size
-                        self.snake_delta_y = 0
-                        break
-                    if event.key == pygame.K_RIGHT and self.snake_delta_x != -self.snake_size:
-                        self.snake_delta_x = self.snake_size
-                        self.snake_delta_y = 0
-                        break
-                    if event.key == pygame.K_UP and self.snake_delta_y != self.snake_size and not self._is_stationary():
-                        self.snake_delta_y = -self.snake_size
-                        self.snake_delta_x = 0
-                        break
-                    if event.key == pygame.K_DOWN and self.snake_delta_y != -self.snake_size:
-                        self.snake_delta_y = self.snake_size
-                        self.snake_delta_x = 0
-                        break
+                self._check_quit_event(event)
+
+                if not use_ai:
+                    self._check_move_event(event)
+
+            if use_ai:
+                direction = self.ai(self.get_game_state())
+                self._set_direction(direction)
 
             if self._is_stationary():
                 self.clock.tick(config.CLOCK_SPEED)
                 continue
-            
+
             self._move_snake()
             self._check_if_apple_eaten()
             self._check_out_of_bounds()
