@@ -22,7 +22,6 @@ class SnakeGame():
     def __init__(self):
         self.font_style = pygame.font.SysFont(None, 50)
 
-
         self.width   = config.WIDTH
         self.height  = config.HEIGHT
         self.display = pygame.display.set_mode((self.width, self.height))
@@ -255,7 +254,7 @@ class SnakeGame():
         return game_state
 
 
-    def game_loop(self, use_ai=False):
+    def start(self, use_ai=False):
         self.snake = [[int(self.width / 2), 
                        int((self.height / 2)) + i * self.snake_size] 
                        for i in range(self.snake_len)]
