@@ -292,6 +292,10 @@ class SnakeGame():
         return game_state
 
 
+    def register_ai(self, f):
+        self.ai = f
+
+
     def start(self, use_ai=False):
         self.snake = [[int(self.width / 2), 
                        int((self.height / 2)) + i * self.snake_size] 
