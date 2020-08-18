@@ -163,6 +163,16 @@ class SnakeGame():
         self._draw_snake()
         pygame.display.update()
 
+    
+    def _move_snake(self):
+        snake_head = self.snake[-1].copy()
+        snake_head[0] += self.snake_delta_x
+        snake_head[1] += self.snake_delta_y
+        self.snake.append(snake_head)
+
+        if len(self.snake) > self.snake_len:
+            del self.snake[0]
+
 
     def _is_stationary(self):
         if self.snake_delta_x == 0 and self.snake_delta_y == 0:
@@ -250,7 +260,6 @@ class SnakeGame():
                        int((self.height / 2)) + i * self.snake_size] 
                        for i in range(self.snake_len)]
         self.apple = self._get_random_position()
-
         self._update_display()
 
         while True:
@@ -283,16 +292,7 @@ class SnakeGame():
                 self.clock.tick(config.CLOCK_SPEED)
                 continue
             
-            # Move the snake by creating a 'new head'
-            # at the new position
-            snake_head = self.snake[-1].copy()
-            snake_head[0] += self.snake_delta_x
-            snake_head[1] += self.snake_delta_y
-            self.snake.append(snake_head)
-
-            if len(self.snake) > self.snake_len:
-                del self.snake[0]
-
+            self._move_snake()
             self._check_if_apple_eaten()
             self._check_out_of_bounds()
             self._check_collision_with_self()
