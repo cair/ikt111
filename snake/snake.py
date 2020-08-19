@@ -165,7 +165,7 @@ class SnakeGame():
 
     
     def _set_direction(self, direction):
-        if direction == 'up' and self.snake_delta_y != self.snake_size:
+        if direction == 'up' and self.snake_delta_y != self.snake_size and not self._is_stationary():
             self.snake_delta_y = -self.snake_size
             self.snake_delta_x = 0
         elif direction == 'down' and self.snake_delta_y != -self.snake_size:
