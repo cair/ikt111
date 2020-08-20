@@ -51,7 +51,7 @@ Start the game for a human player:
 ```python
 from snake import SnakeGame
 
-snake = Snake()
+snake = SnakeGame()
 snake.start(use_ai=False)
 ```
 ### AI players
