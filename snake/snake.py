@@ -276,15 +276,17 @@ class SnakeGame():
 
 
     def get_game_state(self):
-        SNAKE = 1
-        APPLE = 2
+        SNAKE_BODY = 1
+        SNAKE_HEAD = 2
+        APPLE = 3
 
         game_state = np.zeros((int(self.width / self.snake_size), 
                                int(self.height / self.snake_size)))
         
         if self.snake:
-            for segment in self.snake:
-                game_state[utils.pos_to_int(segment)] = SNAKE
+            game_state[utils.pos_to_int(self.snake[-1])] = SNAKE_HEAD
+            for segment in self.snake[:-1]:
+                game_state[utils.pos_to_int(segment)] = SNAKE_BODY
         
         if self.apple:
             game_state[utils.pos_to_int(self.apple)] = APPLE
