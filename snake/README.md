@@ -19,14 +19,14 @@ If you're using windows, I recommend adding Python to the system path during ins
 
 Create and activate a virtual environment in PowerShell or CommandPrompt
 ```powershell
-C:\> py -3.7 -m venv C:\path\to\myenv  
-C:\> C:\path\to\myenv\Scripts\activate
+PS> py -3.7 -m venv C:\path\to\myenv  
+PS> C:\path\to\myenv\Scripts\activate
 ```
 
 Install requirements
 
 ```powershell
-C:\> py -m pip install -r requirements.txt
+PS> py -m pip install -r requirements.txt
 ```
 
 **Mac / Linux**
