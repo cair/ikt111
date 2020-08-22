@@ -18,6 +18,13 @@ colors = {
     'white': (255, 255, 255),
 }
 
+states = {
+    'board': 0,
+    'snake_body': 1,
+    'snake_head': 2,
+    'apple': 3
+}
+
 class SnakeGame():
     def __init__(self):
         self.font_style = pygame.font.SysFont(None, 50)
@@ -304,12 +311,12 @@ class SnakeGame():
                                int(self.height / self.snake_size)))
         
         if self.snake:
-            game_state[utils.pos_to_int(self.snake[-1])] = SNAKE_HEAD
+            game_state[utils.pos_to_int(self.snake[-1])] = states['snake_head']
             for segment in self.snake[:-1]:
-                game_state[utils.pos_to_int(segment)] = SNAKE_BODY
+                game_state[utils.pos_to_int(segment)] = states['snake_body']
         
         if self.apple:
-            game_state[utils.pos_to_int(self.apple)] = APPLE
+            game_state[utils.pos_to_int(self.apple)] = states['apple']
 
         return game_state
 
