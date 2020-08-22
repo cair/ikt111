@@ -249,16 +249,15 @@ class SnakeGame():
             return [utils.rand_p(self.width), 
                     utils.rand_p(self.height)]
         
-        legal_pos  = self._get_legal_position()
-        return legal_pos
-
-
-    def _get_legal_position(self):
-        legal_positions = [p for p in zip(*np.where(self.get_game_state() == 0))]
+        legal_positions = self._get_legal_positions()
         pos = random.choice(legal_positions)
         return [pos[0] * self.snake_size, 
                 pos[1] * self.snake_size]
 
+
+    def _get_legal_positions(self):
+        return np.array([p for p in zip(*np.where(self.get_game_state() == 0))])
+    
 
     def _game_over(self, msg='You Lost'):
         self._display_message(msg)
