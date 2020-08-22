@@ -274,11 +274,35 @@ class SnakeGame():
         quit()
 
 
-    def get_game_state(self):
-        SNAKE_BODY = 1
-        SNAKE_HEAD = 2
-        APPLE = 3
+    def is_legal(self, direction):
+        game_state = self.get_game_state()
+        temp_head = self.snake[-1].copy()
 
+        if direction == 'up':
+            temp_head[1] += -self.snake_size
+        elif direction == 'down':
+            temp_head[1] += self.snake_size
+        elif direction == 'left':
+            temp_head[0] += -self.snake_size
+        elif direction == 'right':
+            temp_head[0] += self.snake_size
+        else:
+            # Illegal move?
+            return False
+
+        # Out of bounds
+        if (temp_head[0] < 0 or temp_head[0] >= self.width) or \
+           (temp_head[1] < 0 or temp_head[1] >= self.height):
+           return False
+
+        # Collision with self
+        if self.snake_len > 1 and temp_head in self.snake[:-1]:
+            return False
+
+        return True
+
+
+    def get_game_state(self):
         game_state = np.zeros((int(self.width / self.snake_size), 
                                int(self.height / self.snake_size)))
         
