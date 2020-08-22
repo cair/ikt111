@@ -219,7 +219,6 @@ class SnakeGame():
 
     
     def _check_if_apple_eaten(self):
-        # TODO: Implement next
         if self.snake[-1] == self.apple:
             self.apple = self._get_random_position()
             self.snake_len += 1
