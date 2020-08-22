@@ -226,10 +226,8 @@ class SnakeGame():
 
 
     def _check_collision_with_self(self):
-        if self.snake_len > 1:
-            for segment in self.snake[:-1]:
-                if self.snake[-1] == segment:
-                    self._game_over()
+        if self.snake_len > 1 and self.snake[-1] in self.snake[:-1]:
+            self._game_over()
 
 
     def _check_out_of_bounds(self):
