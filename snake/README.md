@@ -93,4 +93,4 @@ def super_ai(game_state):
 snake.start(use_ai=True)
 ```
 ## Reporting Bugs
-If you encounter any bugs please raise an issue for it in the repository! 
+If you encounter any bugs please raise an issue for it, or let me know either by email or in class :) 
