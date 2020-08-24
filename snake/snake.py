@@ -315,8 +315,30 @@ class SnakeGame():
         return True
 
 
+    def is_winning(self, moves):
+        temp_snake = self.snake.copy()
+        temp_head = temp_snake[-1]
 
-        return True
+        if isinstance(moves, str):
+            moves = [moves]
+
+        for move in moves:
+            if move == 'up':
+                temp_head[1] += -self.snake_size
+            elif move == 'down':
+                temp_head[1] += self.snake_size
+            elif move == 'left':
+                temp_head[0] += -self.snake_size
+            elif move == 'right':
+                temp_head[0] += self.snake_size
+            else:
+                # Illegal move?
+                return False
+
+            if temp_head[0] == self.apple[0] and temp_head[1] == self.apple[1]:
+                return True
+
+        return False
 
 
     def get_game_state(self):
@@ -347,6 +369,7 @@ class SnakeGame():
 
 
     def register_ai(self, f):
+        """Decorator for registering 'external' AI"""
         self.ai = f
 
 
