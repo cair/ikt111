@@ -278,30 +278,43 @@ class SnakeGame():
         quit()
 
 
-    def is_legal(self, direction):
-        game_state = self.get_game_state()
-        temp_head = self.snake[-1].copy()
+    def is_legal(self, moves):
+        temp_snake = self.snake.copy()
+        temp_head = temp_snake[-1]
 
-        if direction == 'up':
-            temp_head[1] += -self.snake_size
-        elif direction == 'down':
-            temp_head[1] += self.snake_size
-        elif direction == 'left':
-            temp_head[0] += -self.snake_size
-        elif direction == 'right':
-            temp_head[0] += self.snake_size
-        else:
-            # Illegal move?
-            return False
+        if isinstance(moves, str):
+            moves = [moves]
 
-        # Out of bounds
-        if (temp_head[0] < 0 or temp_head[0] >= self.width) or \
-           (temp_head[1] < 0 or temp_head[1] >= self.height):
-           return False
+        for move in moves:
+            if move == 'up':
+                temp_head[1] += -self.snake_size
+            elif move == 'down':
+                temp_head[1] += self.snake_size
+            elif move == 'left':
+                temp_head[0] += -self.snake_size
+            elif move == 'right':
+                temp_head[0] += self.snake_size
+            else:
+                # Illegal move?
+                return False
 
-        # Collision with self
-        if self.snake_len > 1 and temp_head in self.snake[:-1]:
-            return False
+            # Out of bounds
+            if (temp_head[0] < 0 or temp_head[0] >= self.width) or \
+            (temp_head[1] < 0 or temp_head[1] >= self.height):
+                return False
+
+            # Collision with self
+            #if self.snake_len > 1 and temp_head in self.snake[:-1]:
+            if temp_head in temp_snake[:-1]:
+                return False
+
+            # Simulate move by updating temp_snake
+            temp_snake.append(temp_head)
+            temp_snake.pop(0)
+
+        return True
+
+
 
         return True
 
