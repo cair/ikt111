@@ -49,6 +49,7 @@ class SnakeGame():
 
 
     def _display_message(self, msg, color=colors['blue']):
+        """Helper function to show message on display"""
         message = self.font_style.render(msg, True, color)
         message_rect = message.get_rect(center=(self.width / 2, self.height / 2))
 
@@ -58,6 +59,7 @@ class SnakeGame():
 
 
     def _load_image(self, img_path, colorkey=None):
+        """Helper function to load image from disk"""
         image = pygame.image.load(img_path).convert()
         image = pygame.transform.scale(image, (self.snake_size, self.snake_size))
         if colorkey:
@@ -66,6 +68,7 @@ class SnakeGame():
 
 
     def _draw_snake(self):
+        """Helper function to draw snake on display"""
         # Determine correct image for snake head
         snake_head = self.snake[-1]
         if snake_head[1] < self.snake[-2][1]:
@@ -160,11 +163,13 @@ class SnakeGame():
 
 
     def _draw_apple(self):
+        """Helper function to draw apple on display"""
         image = self._load_image('gfx/apple_white.png')
         self.display.blit(image, self.apple)
 
 
     def _update_display(self):
+        """Helper function to update pygame display"""
         self.display.fill(colors['white'])
         self._draw_apple()
         self._draw_snake()
@@ -172,6 +177,7 @@ class SnakeGame():
 
     
     def _set_direction(self, direction):
+        """Helper function to set snake direction delta"""
         if direction == 'up' and self.snake_delta_y != self.snake_size and not self._is_stationary():
             self.snake_delta_y = -self.snake_size
             self.snake_delta_x = 0
@@ -188,7 +194,16 @@ class SnakeGame():
             # Unknown move - do nothing
             pass
 
+
+    def _is_stationary(self):
+        """Helper function to check if snake is standing still"""
+        if self.snake_delta_x == 0 and self.snake_delta_y == 0:
+            return True
+        else:
+            return False
+
     def _move_snake(self):
+        """Helper function to move snake position"""
         snake_head = self.snake[-1].copy()
         snake_head[0] += self.snake_delta_x
         snake_head[1] += self.snake_delta_y
@@ -198,15 +213,8 @@ class SnakeGame():
             del self.snake[0]
 
 
-    def _check_quit_event(self, event):
-        if event.type == pygame.QUIT:
-            self._game_over(msg='Quitting...')
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q:
-                self._game_over(msg='Quitting...')
-
-
     def _check_move_event(self, event):
+        """Helper function to extract move from user keyboard input"""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 self._set_direction('left')
@@ -218,37 +226,44 @@ class SnakeGame():
                 self._set_direction('down')
 
 
-    def _is_stationary(self):
-        if self.snake_delta_x == 0 and self.snake_delta_y == 0:
-            return True
-        else:
-            return False
+    def _check_quit_event(self, event):
+        """Helper function to check for "user want's to quit" conditions"""
+        if event.type == pygame.QUIT:
+            self._game_over(msg='Quitting...')
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q:
+                self._game_over(msg='Quitting...')
 
     
     def _check_if_apple_eaten(self):
+        """Helper function to check if snake has eaten the apple"""
         if self.snake[-1] == self.apple:
             self.apple = self._get_random_position()
             self.snake_len += 1
 
 
     def _check_collision_with_self(self):
+        """Helper function to check if snake has eaten itself"""
         if self.snake_len > 1 and self.snake[-1] in self.snake[:-1]:
             self._game_over()
 
 
     def _check_out_of_bounds(self):
+        """Helper function to check if snake has moved outside the board"""
         snake_head = self.snake[-1]
         if snake_head[0] >= self.width or snake_head[0] < 0 or snake_head[1] >= self.height or snake_head[1] < 0:
             self._game_over()
 
 
     def _check_win_condition(self):
+        """Helper function to check for win-conditions"""
         # Check win condition
         if not 0 in self.get_game_state():
             self._game_won()
 
 
     def _get_random_position(self):
+        """Helper function to generate a random, legal position"""
         if not self.snake and not self.apple:
             return [utils.rand_p(self.width), 
                     utils.rand_p(self.height)]
@@ -260,25 +275,37 @@ class SnakeGame():
 
 
     def _get_legal_positions(self):
+        """Helper function to get all current legal positions"""
         return np.array([p for p in zip(*np.where(self.get_game_state() == 0))])
     
 
     def _game_over(self, msg='You Lost'):
+        """Helper function to display a loss-condition message"""
         self._display_message(msg)
         self._exit()
 
 
     def _game_won(self, msg='You Won!'):
+        """Helper function to display a win-condition message"""
         self._display_message(msg)
         self._exit()
 
 
     def _exit(self):
+        """Helper function to exit the game"""
         pygame.quit()
         quit()
 
 
     def is_legal(self, moves):
+        """Helper function to check if a sequence of moves is legal / will not end in a loss-condition
+
+        This function will simulate moving the snake accoring to the provided sequence of moves.
+
+        Returns:
+            bool: True if all the moves are legal
+            bool: False if any of the moves end in a loss-condition
+        """
         temp_snake = self.snake.copy()
         temp_head = temp_snake[-1]
 
@@ -316,6 +343,14 @@ class SnakeGame():
 
 
     def is_winning(self, moves):
+        """Helper function to check if a sequence of moves lead to the apple
+
+        NB! This function will not check for legal moves
+
+        Returns:
+            bool: True if the sequence lead to the apple
+            bool: False if the sequence does not lead to the apple
+        """
         temp_snake = self.snake.copy()
         temp_head = temp_snake[-1]
 
@@ -342,6 +377,17 @@ class SnakeGame():
 
 
     def get_game_state(self):
+        """Converts the game canvas into a 2D numpy representaion
+        
+        Possible game states:
+            0: Empty location
+            1: Snake body segment
+            2: Snake head segment
+            3: Apple
+
+        Returns:
+            numpy.array: Game state representation
+        """
         game_state = np.zeros((int(self.width / self.snake_size), 
                                int(self.height / self.snake_size)))
         
@@ -357,12 +403,14 @@ class SnakeGame():
 
 
     def get_snake_head_position(self):
+        """Returns the current position og the snake head in the game state"""
         game_state = self.get_game_state()
         pos = np.where(game_state == states['snake_head'])
         return tuple(np.hstack(pos))
 
 
     def get_apple_position(self):
+        """Returns the current position of the apple in the game state"""
         game_state = self.get_game_state()
         pos = np.where(game_state == states['apple'])
         return tuple(np.hstack(pos))
