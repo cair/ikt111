@@ -321,6 +321,12 @@ class SnakeGame():
         return game_state
 
 
+    def get_snake_head_position(self):
+        game_state = self.get_game_state()
+        pos = np.where(game_state == states['snake_head'])
+        return tuple(np.hstack(pos))
+
+
     def register_ai(self, f):
         self.ai = f
 
