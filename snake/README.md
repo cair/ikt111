@@ -13,20 +13,32 @@ Package requirements are given in `requirements.txt`
 
 Download and install Python3.7.x
 
-If you're using windows, I recommend adding Python to the system path during installation
+If you're using windows, I recommend adding Python to the system path during installation (anaconda is recommended for windows https://www.anaconda.com/)
+
+
+
+
 
 **Windows**
 
+
 Create and activate a virtual environment in PowerShell or CommandPrompt
-```powershell
-PS> py -3.7 -m venv C:\path\to\myenv  
-PS> C:\path\to\myenv\Scripts\activate
+```anaconda prompt 
+conda create --name <env name> python=3.7
+source activate <env name>
+source deactivate
+
+If in doubt what the env name was:
+conda info --envs : lists all environments
+
+conda list : list all packages installed
+
 ```
 
 Install requirements
 
-```powershell
-PS> py -m pip install -r requirements.txt
+```anaconda prompt
+pip install -r requirements.txt
 ```
 
 **Mac / Linux**
