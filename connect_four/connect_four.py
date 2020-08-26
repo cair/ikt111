@@ -83,7 +83,7 @@ class ConnectFour():
         """Helper function to update pygame display"""
         self.display.fill(colors['white'])
         self.display.blit(self.background.image, 
-                            self.background.rect)
+                          self.background.rect)
 
         for piece in self.game_pieces:
             self.display.blit(piece.image, piece.rect)
