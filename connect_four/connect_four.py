@@ -21,6 +21,14 @@ pieces = {
 gfx_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gfx')
 
 
+class Highlighter(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(os.path.join(gfx_dir, 'highlight.png'))
+        self.rect = self.image.get_rect()
+        self.rect.left, self.rect.top = [(12.5 + (81.3 * 6)), 55]
+
+
 class Background(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -50,10 +58,12 @@ class ConnectFour():
         self.height  = config.HEIGHT
         self.display = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Connect Four')
-        self.background = Background()
         self.clock = pygame.time.Clock()
-        self.piece_size = config.PIECE_SIZE
+        
+        self.background = Background()
+        self.highlighter = Highlighter()
 
+        self.piece_size = config.PIECE_SIZE
         self.game_pieces = []
         self.board = [[pieces['board'] for _ in range(config.ROWS)] for _ in range(config.COLS)]
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
