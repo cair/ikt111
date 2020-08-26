@@ -11,38 +11,17 @@ Package requirements are given in `requirements.txt`
 
 ### Installing
 
-Download and install Python3.7.x
+Download and install Python3.7.x >=
 
-If you're using windows, I recommend adding Python to the system path during installation (anaconda is recommended for windows https://www.anaconda.com/)
-
-
-
-
+Open the Snake folder that you downloaded in Visual Studio Code and do the following in the Visual Studio Code terminal:
 
 **Windows**
-
-
-Create and activate a virtual environment in PowerShell or CommandPrompt
-```anaconda prompt 
-conda create --name <env name> python=3.7
-source activate <env name>
-source deactivate
-
-If in doubt what the env name was:
-conda info --envs : lists all environments
-
-conda list : list all packages installed
-
-```
-
 Install requirements
-
-```anaconda prompt
-pip install -r requirements.txt
+```powershell
+py -m pip install -U -r requirements.txt --user
 ```
 
 **Mac / Linux**
-
 Create and activate a virtual environment
 
 ```bash
@@ -57,7 +36,6 @@ $ pip3 install -r requirements.txt
 ```
 
 **Run Example**
-
 Start the game for a human player:
 
 ```python
