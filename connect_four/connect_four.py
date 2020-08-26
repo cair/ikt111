@@ -89,6 +89,11 @@ class ConnectFour():
             self.display.blit(piece.image, piece.rect)
         pygame.display.update()
 
+    def _exit(self):
+        """Helper function to exit the game"""
+        pygame.quit()
+        quit()
+
 
     def _check_quit_event(self, event):
         """Helper function to check for "user want's to quit" conditions"""
