@@ -46,6 +46,7 @@ class SnakeGame():
         self.snake_size = config.SNAKE_SIZE
 
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
+        self.moves = []
 
 
     def _display_message(self, msg, color=colors['blue']):
@@ -437,7 +438,9 @@ class SnakeGame():
                     self._check_move_event(event)
 
             if use_ai:
-                direction = self.ai(self.get_game_state())
+                if not self.moves:
+                    self.moves = self.ai(self.get_game_state())
+                direction = self.moves.pop(0)
                 self._set_direction(direction)
 
             if self._is_stationary():
