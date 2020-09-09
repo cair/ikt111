@@ -5,6 +5,6 @@ snake = SnakeGame()
 
 @snake.register_ai
 def super_ai():
-    return random.choice(['up', 'down', 'left', 'right'])
+    return [random.choice(['up', 'down', 'left', 'right'])]
 
-snake.start(use_ai=True)
+snake.start(use_ai=False)

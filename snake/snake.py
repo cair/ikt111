@@ -428,7 +428,7 @@ class SnakeGame:
             self.update_game_state()
             if use_ai:
                 if not self.moves:
-                    self.moves = self.ai(self.get_game_state())
+                    self.moves = self.ai()
                 direction = self.moves.pop(0)
                 self._set_direction(direction)
 
