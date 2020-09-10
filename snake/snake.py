@@ -55,7 +55,8 @@ class SnakeGame:
             'tail': pygame.image.load('gfx/tail.png').convert_alpha()
         }
 
-        self.game_state = None
+        self._update_game_state()
+
         self.moves = []
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
@@ -183,6 +184,7 @@ class SnakeGame:
         self._draw_apple()
         self._draw_snake()
         pygame.display.update()
+        self._update_game_state()
 
     def _set_direction(self, direction):
         """Helper function to set snake direction delta"""
@@ -423,12 +425,11 @@ class SnakeGame:
         self.ai = f
 
     def start(self, use_ai=False):
-        self._update_game_state()
+        #self._update_game_state()
         self.snake = [[int(self.width / 2),
                        int((self.height / 2)) + i * self.snake_size]
                       for i in range(self.snake_len)]
         self.apple = self._get_random_position()
-        self._update_game_state()
         self._update_display()
 
         # Game Loop
@@ -453,13 +454,10 @@ class SnakeGame:
                 continue
 
             self._move_snake()
-            self._update_game_state()
             self._check_if_apple_eaten()
-            self._update_game_state()
             self._check_out_of_bounds()
             self._check_collision_with_self()
             self._check_win_condition()
 
-            self._update_game_state()
             self._update_display()
             self.clock.tick(config.CLOCK_SPEED)
