@@ -398,12 +398,12 @@ class SnakeGame:
     def get_snake_head_position(self):
         """Returns the current position og the snake head in the game state"""
         pos = np.where(self.game_state == states['snake_head'])
-        return tuple(np.hstack(pos))
+        return list(np.hstack(pos))
 
     def get_apple_position(self):
         """Returns the current position of the apple in the game state"""
         pos = np.where(self.game_state == states['apple'])
-        return tuple(np.hstack(pos))
+        return list(np.hstack(pos))
 
     def register_ai(self, f):
         """Decorator for registering 'external' AI"""
