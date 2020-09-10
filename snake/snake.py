@@ -294,6 +294,27 @@ class SnakeGame:
         pygame.quit()
         quit()
 
+    def _update_game_state(self):
+        """Converts the game canvas into a 2D numpy representation and
+        updates the game state
+
+        Possible game states:
+            0: Empty location
+            1: Snake body segment
+            2: Snake head segment
+            3: Apple
+        """
+        self.game_state = np.zeros((int(self.width / self.snake_size),
+                                    int(self.height / self.snake_size)))
+
+        if self.snake:
+            self.game_state[utils.pos_to_int(self.snake[-1])] = states['snake_head']
+            for segment in self.snake[:-1]:
+                self.game_state[utils.pos_to_int(segment)] = states['snake_body']
+
+        if self.apple:
+            self.game_state[utils.pos_to_int(self.apple)] = states['apple']
+
     def is_legal(self, moves):
         """Function to check if a sequence of moves is legal / will not end
         in a loss-condition
@@ -375,9 +396,9 @@ class SnakeGame:
 
         return False
 
-    def update_game_state(self):
-        """Converts the game canvas into a 2D numpy representation and
-        updates the game state
+    def get_game_state(self):
+        """The game state is a 2D numpy representation of the game canvas and
+           contains relevant game information states in numeric form:
 
         Possible game states:
             0: Empty location
@@ -385,16 +406,7 @@ class SnakeGame:
             2: Snake head segment
             3: Apple
         """
-        self.game_state = np.zeros((int(self.width / self.snake_size),
-                                    int(self.height / self.snake_size)))
-
-        if self.snake:
-            self.game_state[utils.pos_to_int(self.snake[-1])] = states['snake_head']
-            for segment in self.snake[:-1]:
-                self.game_state[utils.pos_to_int(segment)] = states['snake_body']
-
-        if self.apple:
-            self.game_state[utils.pos_to_int(self.apple)] = states['apple']
+        return self.game_state
 
     def get_snake_head_position(self):
         """Returns the current position og the snake head in the game state"""
