@@ -7,4 +7,4 @@ snake = SnakeGame()
 def super_ai():
     return [random.choice(['up', 'down', 'left', 'right'])]
 
-snake.start(use_ai=False)
+snake.start(use_ai=True)
