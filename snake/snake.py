@@ -3,6 +3,7 @@ import sys
 import time
 import pygame
 import numpy as np
+import copy
 
 import utils
 import config
@@ -211,7 +212,7 @@ class SnakeGame:
 
     def _move_snake(self):
         """Helper function to move snake position"""
-        snake_head = self.snake[-1].copy()
+        snake_head = copy.deepcopy(self.snake[-1])
         snake_head[0] += self.snake_delta_x
         snake_head[1] += self.snake_delta_y
         self.snake.append(snake_head)
@@ -304,13 +305,14 @@ class SnakeGame:
             bool: True if all the moves are legal
             bool: False if any of the moves end in a loss-condition
         """
-        temp_snake = self.snake.copy()
-        temp_head = temp_snake[-1]
+        temp_snake = copy.deepcopy(self.snake)
 
         if isinstance(moves, str):
             moves = [moves]
 
         for move in moves:
+            temp_head = copy.deepcopy(temp_snake[-1])
+            
             if move == 'up':
                 temp_head[1] += -self.snake_size
             elif move == 'down':
@@ -348,7 +350,7 @@ class SnakeGame:
             bool: True if the sequence lead to the apple
             bool: False if the sequence does not lead to the apple
         """
-        temp_snake = self.snake.copy()
+        temp_snake = copy.deepcopy(self.snake)
         temp_head = temp_snake[-1]
 
         if isinstance(moves, str):
