@@ -337,7 +337,7 @@ class SnakeGame:
 
             # Simulate move by updating temp_snake
             temp_snake.append(temp_head)
-            temp_snake.pop(0)
+            del temp_snake[0]
 
         return True
 
