@@ -415,6 +415,7 @@ class SnakeGame:
                        int((self.height / 2)) + i * self.snake_size]
                       for i in range(self.snake_len)]
         self.apple = self._get_random_position()
+        self.update_game_state()
         self._update_display()
 
         # Game Loop
@@ -439,10 +440,13 @@ class SnakeGame:
                 continue
 
             self._move_snake()
+            self.update_game_state()
             self._check_if_apple_eaten()
+            self.update_game_state()
             self._check_out_of_bounds()
             self._check_collision_with_self()
             self._check_win_condition()
 
+            self.update_game_state()
             self._update_display()
             self.clock.tick(config.CLOCK_SPEED)
