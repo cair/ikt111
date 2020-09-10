@@ -78,7 +78,22 @@ snake.start(use_ai=True)
 `snake.py` contains many functions. The majority of them are there to make the game work, and all start their name with an **underscore**, ie. `def _update_display(self)`.
 Though some of these "core game functions" are accessible for everyone to use, they are not meant to be used as part of solutions for assigments.  
 
-There are some functions that does _not_ start with an **underscore**, ie. `def get_snake_head_position(self)`. These are there to offer help / functionality that can be used to interract with the game ( and is also allowed for use in assignment solutions ).
+There are some functions that does _not_ start with an **underscore**, ie. `def get_snake_head_position(self)`. These are there to offer help / functionality that can be used to interract with the game ( and is also allowed for use in assignment solutions ). Below is a list of all available, public functions:
+
+>`is_legal(moves)`  
+Check if a sequence of moves is legal  
+
+>`is_winning(moves)`  
+Check if a sequence of moves leads to the apple  
+
+>`get_game_state()`  
+Returns current game state  
+
+>`get_snake_head_position()`  
+Returns current posistion of snake head ( in game state coordinates )  
+
+>`get_apple_position()`  
+Returns current posistion of apple ( in game state coordinates )  
 
 ### Game state
 One of the public functions will provide you with a representation of the current game state in the form of $`N$x$M`$ matrix. The different game elements are represented by numbers:  
