@@ -327,7 +327,7 @@ class SnakeGame:
 
             # Out of bounds
             if (temp_head[0] < 0 or temp_head[0] >= self.width) or \
-                    (temp_head[1] < 0 or temp_head[1] >= self.height):
+               (temp_head[1] < 0 or temp_head[1] >= self.height):
                 return False
 
             # Collision with self
