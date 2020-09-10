@@ -9,7 +9,9 @@ Developed as a supplement for IKT111, Univeristy of Agder.
 Developed and tested using Python3.7.5  
 Package requirements are given in `requirements.txt`
 
-### Installing
+---
+
+### Installation
 
 Download and install Python3.7.x >=
 
@@ -32,11 +34,11 @@ $ source venv/bin/activate
 Install requirements
 
 ```bash
-$ pip3 install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
-**Run Example**
-Start the game for a human player:
+**Run Example**  
+Start and play the game yourself
 
 ```python
 from snake import SnakeGame
@@ -44,9 +46,20 @@ from snake import SnakeGame
 snake = SnakeGame()
 snake.start(use_ai=False)
 ```
-### AI players
-The game also allows you to 'register' an AI player.
-If an AI is registered, each tick the game will provide the AI with a representation of the game state as an $N$x$M$ matrix. The different game elements are represented by numbers:  
+Movement: _Arrow keys_  
+Quit game: _Q / q_
+
+---
+
+
+### "Public" and "Private" functions
+`snake.py` contains many functions. The majority of them are there to make the game work, and all start their name with an **underscore**, ie. `def _update_display(self)`.
+Though some of these "core game functions" are accessible for everyone to use, they are not meant to be used as part of solutions for assigments.  
+
+There are some functions that does _not_ start with an **underscore**, ie. `def get_snake_head_position(self)`. These are there to offer help / functionality that can be used to interract with the game ( and is also allowed for use in assignment solutions ).
+
+### Game state
+One of the public functions will provide you with a representation of the current game state in the form of $`N$x$M`$ matrix. The different game elements are represented by numbers:  
 
 `Background = 0`  
 `Snake body = 1`  
@@ -64,23 +77,31 @@ Example:
  [0, 0, 0, 0, 0, 0]]
 ```
 
-The game also expects the AI to return one of the following move actions each tick: `'up', 'down', 'left', 'right'`
+### Snake AI
+The game allows you to register a custom function to control the snake.
+See example below on how to register an AI-function. 
 
-To register a function as an AI, the game has a decorator that can be used. Example:
+The game expects the AI-function to return a list of moves, where each move _has_ to be one of the following: `'up', 'down', 'left', 'right'`
+
+Example code:
 ```python
 from snake import SnakeGame
 
 snake = SnakeGame()
 
-@snake.register_ai # Decorator
+@snake.register_ai # Decorator that tells the game to use your function
 def super_ai(game_state):
     #
     # Some magic AI stuff here
     #
 
-    return move
+    return ['left', ..., 'down'] # Obligatory list of moves
 
 snake.start(use_ai=True)
 ```
+
+---
+
+
 ## Reporting Bugs
 If you encounter any bugs please raise an issue for it, or let me know either by email or in class :) 
