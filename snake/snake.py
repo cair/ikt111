@@ -386,11 +386,9 @@ class SnakeGame:
                                     int(self.height / self.snake_size)))
 
         if self.snake:
-            self.game_state[utils.pos_to_int(self.snake[-1])] = states[
-                'snake_head']
+            self.game_state[utils.pos_to_int(self.snake[-1])] = states['snake_head']
             for segment in self.snake[:-1]:
-                self.game_state[utils.pos_to_int(segment)] = states[
-                    'snake_body']
+                self.game_state[utils.pos_to_int(segment)] = states['snake_body']
 
         if self.apple:
             self.game_state[utils.pos_to_int(self.apple)] = states['apple']
