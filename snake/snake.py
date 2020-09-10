@@ -323,16 +323,19 @@ class SnakeGame:
                 temp_head[0] += self.snake_size
             else:
                 # Illegal move?
+                logging.debug('is_legal(): Illegal move')
                 return False
 
             # Out of bounds
             if (temp_head[0] < 0 or temp_head[0] >= self.width) or \
                (temp_head[1] < 0 or temp_head[1] >= self.height):
+                logging.debug('is_legal(): Out of bounds')
                 return False
 
             # Collision with self
             # if self.snake_len > 1 and temp_head in self.snake[:-1]:
             if temp_head in temp_snake[:-1]:
+                logging.debug('is_legal(): Collision with self')
                 return False
 
             # Simulate move by updating temp_snake
@@ -357,6 +360,7 @@ class SnakeGame:
             moves = [moves]
 
         for move in moves:
+            
             if move == 'up':
                 temp_head[1] += -self.snake_size
             elif move == 'down':
