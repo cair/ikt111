@@ -51,6 +51,28 @@ Quit game: _Q / q_
 
 ---
 
+### Snake AI
+The game allows you to register a custom function to control the snake.
+See example below on how to register an AI-function. 
+
+The game expects the AI-function to return a list of moves, where each move _has_ to be one of the following: `'up', 'down', 'left', 'right'`
+
+Example code:
+```python
+from snake import SnakeGame
+
+snake = SnakeGame()
+
+@snake.register_ai # Decorator that tells the game to use your function
+def super_ai(game_state):
+    #
+    # Some magic AI stuff here
+    #
+
+    return ['left', ..., 'down'] # Obligatory list of moves
+
+snake.start(use_ai=True)
+```
 
 ### "Public" and "Private" functions
 `snake.py` contains many functions. The majority of them are there to make the game work, and all start their name with an **underscore**, ie. `def _update_display(self)`.
@@ -75,29 +97,6 @@ Example:
  [0, 1, 1, 2, 0, 3],
  [0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0]]
-```
-
-### Snake AI
-The game allows you to register a custom function to control the snake.
-See example below on how to register an AI-function. 
-
-The game expects the AI-function to return a list of moves, where each move _has_ to be one of the following: `'up', 'down', 'left', 'right'`
-
-Example code:
-```python
-from snake import SnakeGame
-
-snake = SnakeGame()
-
-@snake.register_ai # Decorator that tells the game to use your function
-def super_ai(game_state):
-    #
-    # Some magic AI stuff here
-    #
-
-    return ['left', ..., 'down'] # Obligatory list of moves
-
-snake.start(use_ai=True)
 ```
 
 ---
