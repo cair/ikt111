@@ -414,18 +414,6 @@ class SnakeGame:
 
         return False
 
-    def get_game_state(self):
-        """The game state is a 2D numpy representation of the game canvas and
-           contains relevant game information states in numeric form:
-
-        Possible game states:
-            0: Empty location
-            1: Snake body segment
-            2: Snake head segment
-            3: Apple
-        """
-        return self.game_state
-
     def simulate_move(self, pos, move):
         """Simulates a move from the given position, and returns the new position"""
         new_pos = copy.deepcopy(pos) # Deepcopy just in case to prevent strange pointer errors
