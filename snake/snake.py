@@ -44,8 +44,13 @@ class SnakeGame:
         self.snake_delta_x = 0
         self.snake_delta_y = 0
 
-        self.snake_len = config.SNAKE_LEN
-        self.snake_size = config.SNAKE_SIZE
+        self.snake_len = config.SNAKE_START_LEN
+        self.sprite_size = utils.find_common_divisor(config.WIDTH,
+                                                     config.HEIGHT,
+                                                     config.MAX_SPRITE_SIZE,
+                                                     config.MIN_SPRITE_SIZE)
+        if not self.sprite_size:
+            self._game_over(msg=f'Invalid game size {self.width}x{self.height}')
 
         self.sprites = {
             'apple': pygame.image.load('gfx/apple.png').convert_alpha(),
@@ -74,7 +79,7 @@ class SnakeGame:
         """Helper function to load image from disk"""
         image = self.sprites[sprite_name]
         image = pygame.transform.scale(image,
-                                       (self.snake_size, self.snake_size))
+                                       (self.sprite_size, self.sprite_size))
         if color_key:
             image.set_colorkey(color_key)
         return image
@@ -167,8 +172,8 @@ class SnakeGame:
             else:
                 # Failsafe - probably won't happen
                 pygame.draw.rect(self.display, colors['green'],
-                                 [seg[0], seg[1], self.snake_size,
-                                  self.snake_size])
+                                 [seg[0], seg[1], self.sprite_size,
+                                  self.sprite_size])
                 return
 
             self.display.blit(image, seg)
@@ -188,18 +193,18 @@ class SnakeGame:
 
     def _set_direction(self, direction):
         """Helper function to set snake direction delta"""
-        if direction == 'up' and self.snake_delta_y != self.snake_size and \
+        if direction == 'up' and self.snake_delta_y != self.sprite_size and \
                 not self._is_stationary():
-            self.snake_delta_y = -self.snake_size
+            self.snake_delta_y = -self.sprite_size
             self.snake_delta_x = 0
-        elif direction == 'down' and self.snake_delta_y != -self.snake_size:
-            self.snake_delta_y = self.snake_size
+        elif direction == 'down' and self.snake_delta_y != -self.sprite_size:
+            self.snake_delta_y = self.sprite_size
             self.snake_delta_x = 0
-        elif direction == 'left' and self.snake_delta_x != self.snake_size:
-            self.snake_delta_x = -self.snake_size
+        elif direction == 'left' and self.snake_delta_x != self.sprite_size:
+            self.snake_delta_x = -self.sprite_size
             self.snake_delta_y = 0
-        elif direction == 'right' and self.snake_delta_x != -self.snake_size:
-            self.snake_delta_x = self.snake_size
+        elif direction == 'right' and self.snake_delta_x != -self.sprite_size:
+            self.snake_delta_x = self.sprite_size
             self.snake_delta_y = 0
         else:
             # Unknown move - do nothing
@@ -269,13 +274,24 @@ class SnakeGame:
     def _get_random_position(self):
         """Helper function to generate a random, legal position"""
         if not self.snake and not self.apple:
-            return [utils.rand_p(self.width),
-                    utils.rand_p(self.height)]
+            return [utils.rand_p(self.width, self.sprite_size),
+                    utils.rand_p(self.height, self.sprite_size)]
 
         legal_positions = self._get_legal_positions()
         pos = random.choice(legal_positions)
-        return [pos[0] * self.snake_size,
-                pos[1] * self.snake_size]
+        return [pos[0] * self.sprite_size,
+                pos[1] * self.sprite_size]
+
+    def _init_snake(self):
+        """Helper function to generate initial snake position"""
+        snake = []
+        for i in range(self.snake_len):
+            x = int(self.width / self.sprite_size / 2) * self.sprite_size
+            y = int(self.height / self.sprite_size / 2) * self.sprite_size
+            y += i * self.sprite_size
+            snake.append([x, y])
+        return snake
+            
 
     def _get_legal_positions(self):
         """Helper function to get all current legal positions"""
@@ -306,16 +322,16 @@ class SnakeGame:
             2: Snake head segment
             3: Apple
         """
-        self.game_state = np.zeros((int(self.width / self.snake_size),
-                                    int(self.height / self.snake_size)))
+        self.game_state = np.zeros((int(self.width / self.sprite_size),
+                                    int(self.height / self.sprite_size)))
 
         if self.snake:
-            self.game_state[utils.pos_to_int(self.snake[-1])] = states['snake_head']
+            self.game_state[utils.pos_to_int(self.snake[-1], self.sprite_size)] = states['snake_head']
             for segment in self.snake[:-1]:
-                self.game_state[utils.pos_to_int(segment)] = states['snake_body']
+                self.game_state[utils.pos_to_int(segment, self.sprite_size)] = states['snake_body']
 
         if self.apple:
-            self.game_state[utils.pos_to_int(self.apple)] = states['apple']
+            self.game_state[utils.pos_to_int(self.apple, self.sprite_size)] = states['apple']
 
     def is_legal(self, moves):
         """Function to check if a sequence of moves is legal / will not end
@@ -337,13 +353,13 @@ class SnakeGame:
             temp_head = copy.deepcopy(temp_snake[-1])
             
             if move == 'up':
-                temp_head[1] += -self.snake_size
+                temp_head[1] += -self.sprite_size
             elif move == 'down':
-                temp_head[1] += self.snake_size
+                temp_head[1] += self.sprite_size
             elif move == 'left':
-                temp_head[0] += -self.snake_size
+                temp_head[0] += -self.sprite_size
             elif move == 'right':
-                temp_head[0] += self.snake_size
+                temp_head[0] += self.sprite_size
             else:
                 # Illegal move?
                 return False
@@ -382,13 +398,13 @@ class SnakeGame:
         for move in moves:
             
             if move == 'up':
-                temp_head[1] += -self.snake_size
+                temp_head[1] += -self.sprite_size
             elif move == 'down':
-                temp_head[1] += self.snake_size
+                temp_head[1] += self.sprite_size
             elif move == 'left':
-                temp_head[0] += -self.snake_size
+                temp_head[0] += -self.sprite_size
             elif move == 'right':
-                temp_head[0] += self.snake_size
+                temp_head[0] += self.sprite_size
             else:
                 # Illegal move?
                 return False
@@ -410,6 +426,21 @@ class SnakeGame:
         """
         return self.game_state
 
+    def simulate_move(self, pos, move):
+        """Simulates a move from the given position, and returns the new position"""
+        new_pos = copy.deepcopy(pos) # Deepcopy just in case to prevent strange pointer errors
+        if move == 'up':
+            new_pos[1] += -1
+        elif move == 'down':
+            new_pos[1] += 1
+        elif move == 'left':
+            new_pos[0] += -1
+        elif move == 'right':
+            new_pos[0] += 1
+        else:
+            raise ValueError(f'Invalid Move \'{move}\'')
+        return new_pos
+
     def get_snake_head_position(self):
         """Returns the current position og the snake head in the game state"""
         pos = np.where(self.game_state == states['snake_head'])
@@ -426,9 +457,7 @@ class SnakeGame:
 
     def start(self, use_ai=False):
         #self._update_game_state()
-        self.snake = [[int(self.width / 2),
-                       int((self.height / 2)) + i * self.snake_size]
-                      for i in range(self.snake_len)]
+        self.snake = self._init_snake()
         self.apple = self._get_random_position()
         self._update_display()
 
