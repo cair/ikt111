@@ -26,8 +26,10 @@ class Highlighter(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(gfx_dir, 'highlight.png'))
         self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = [(12.5 + (81.3 * 6)), 55]
-
+        self.base_x = 12.5
+        self.base_y = 55
+        self.d_x = 81.3
+        #self.rect.left, self.rect.top = [self.base_x + (self.d_x), 55]
 
 class Background(pygame.sprite.Sprite):
     def __init__(self):
@@ -42,6 +44,8 @@ class RedPiece(pygame.sprite.Sprite):
         self.image = pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
         self.rect = self.image.get_rect()
         self.rect.center = location
+        self.d_x = 81
+        self.d_y = 80.8
 
 class YellowPiece(pygame.sprite.Sprite):
     def __init__(self, location):
@@ -49,8 +53,9 @@ class YellowPiece(pygame.sprite.Sprite):
         self.image = pygame.image.load(os.path.join(gfx_dir, 'yellow_piece.png'))
         self.rect = self.image.get_rect()
         self.rect.center = location
-
-
+        self.d_x = 81
+        self.d_y = 80.8
+        
 class ConnectFour():
     def __init__(self):
         self.font_style = pygame.font.SysFont(None, 80)
@@ -84,6 +89,9 @@ class ConnectFour():
         self.display.fill(colors['white'])
         self.display.blit(self.background.image, 
                           self.background.rect)
+        
+        self.display.blit(self.highlighter.image,
+                          self.highlighter.rect)
 
         for piece in self.game_pieces:
             self.display.blit(piece.image, piece.rect)
@@ -126,6 +134,9 @@ class ConnectFour():
         while True:
             for event in pygame.event.get():
                 self._check_quit_event(event)
+
+                if event.type == pygame.MOUSEMOTION:
+                    print(pygame.mouse.get_pos())
             
             self._update_display()
 
