@@ -85,9 +85,11 @@ Check if a sequence of moves is legal
 
 >`is_winning(moves)`  
 Check if a sequence of moves leads to the apple  
+This function does _not_ validate if the given moves are legal.
 
->`get_game_state()`  
-Returns current game state  
+>`simulate_move(position, move)`  
+Simulates a move from the given position and returns the new position.  
+This function does _not_ validate if the given move is legal.
 
 >`get_snake_head_position()`  
 Returns current posistion of snake head ( in game state coordinates )  
