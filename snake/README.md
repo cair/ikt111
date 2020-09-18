@@ -98,16 +98,19 @@ Returns current posistion of snake head ( in game state coordinates )
 Returns current posistion of apple ( in game state coordinates )  
 
 ### Game state
-One of the public functions will provide you with a representation of the current game state in the form of an $`N\times M`$ matrix. The different game elements are represented by numbers:  
+The game maintains a representation of the current game state in the form of an $`N\times M`$ matrix. The different game elements are represented by numbers:  
 
 `Background = 0`  
 `Snake body = 1`  
 `Snake head = 2`  
 `Apple = 3`
 
+The game state is stored in a variable called `game_state` and can be accessed through the snake object.
 
 Example:
 ```python
+>>> game_state = snake.game_state
+>>> print(game_state)
 [[0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0],
  [0, 1, 0, 0, 0, 0],
