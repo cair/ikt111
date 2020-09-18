@@ -98,7 +98,7 @@ Returns current posistion of snake head ( in game state coordinates )
 Returns current posistion of apple ( in game state coordinates )  
 
 ### Game state
-The game maintains a representation of the current game state in the form of an $`N\times M`$ matrix. The different game elements are represented by numbers:  
+The game maintains a representation of the current game state in the form of an $`N\times M`$ matrix where the different game elements are represented by the following values:  
 
 `Background = 0`  
 `Snake body = 1`  
