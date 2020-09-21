@@ -1,6 +1,8 @@
+from copy import deepcopy
 import os
 import numpy as np
 import time
+import random
 import pygame
 pygame.init()
 
@@ -18,7 +20,30 @@ pieces = {
     'player2': 2
 }
 
+difficulty = {'easy': 3, 'medium': 5, 'hard': 7}
+
 gfx_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gfx')
+
+
+class Node:
+    def __init__(self, move, parent=None):
+        self.move = move
+        self.parent = parent
+        if not parent:
+            self.depth = 1
+            self.is_opponent = False
+        else:
+            self.depth = parent.depth + 1
+            self.is_opponent = not parent.is_opponent
+
+    def move_list(self):
+        moves = []
+        node = self
+        while node:
+            moves.append((self.move, 1 if self.is_opponent else 2))
+            node = node.parent
+        moves.reverse()
+        return moves
 
 
 class Highlighter(pygame.sprite.Sprite):
@@ -90,6 +115,7 @@ class ConnectFour():
         self.game_pieces = []
         self.game_state = [[pieces['board'] for _ in range(config.ROWS)] for _ in range(config.COLS)]
 
+        self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
 
@@ -155,12 +181,64 @@ class ConnectFour():
         return -1
 
 
-    def _check_if_board_is_full(self):
-        """Helper function to check if the board is full"""
-        for col in self.game_state:
-            if 0 in col:
-                return False
-        return True
+    def _get_next_row(self, col, state=None):
+        if not state:
+            state = self.game_state
+        return next((i - 1 for i, r in enumerate(state[col]) 
+                     if r != pieces['board']), # Condition
+                     config.ROWS - 1) # Default return value
+
+
+    def _put_piece(self, player, col, row, state=None):
+        """Helper function to insert player pieces on the board"""
+        if not state:
+            state = self.game_state
+        
+        if player == pieces['player1']:
+            piece = RedPiece(col, row)
+        elif player == pieces['player2']:
+            piece = YellowPiece(col, row)
+        else:
+            raise Exception(f'Unknown player \'{player}\'')
+
+        state[col][row] = player
+        
+        if state is self.game_state:
+            self.game_pieces.append(piece)
+
+
+    def _make_move(self):
+        open_list = []
+        root_moves = []
+        for col in range(config.COLS):
+            row = self._get_next_row(col)
+            if row > -1:
+                open_list.append(Node(col))
+                root_moves.append(col)
+
+        while open_list:
+            node = open_list.pop(0)
+            moves = node.move_list()
+            new_state = self.simulate_moves(moves)
+            
+            winner = self._check_if_winner(state=new_state)
+            if winner:
+                if winner == pieces['player1']:
+                    continue
+                elif winner == pieces['player2']:
+                    return moves[0][0]
+            
+            for col in range(config.COLS):
+                row = self._get_next_row(col, state=new_state)
+                if row > -1:
+                    child = Node(col, parent=node)
+                    if child.depth > self.max_depth:
+                        open_list = []
+                        break
+                    else:
+                        open_list.append(child)
+    
+        return random.choice(root_moves)
 
 
     def _check_if_col_is_full(self, col):
@@ -168,18 +246,59 @@ class ConnectFour():
         return pieces['board'] in col
 
 
-    def _put_piece(self, player, col):
-        """Helper function to insert player pieces on the board"""
-        # Fin first free row
-        row = next((i - 1 for i, r in enumerate(self.game_state[col]) if r != pieces['board']), config.ROWS - 1)
+    def _check_winning_window(self, window):
+        window = set(window)
+        if pieces['board'] not in window and len(window) == 1:
+            return window.pop()
+        return None
 
-        if player == 'player1':
-            piece = RedPiece(col, row)
-        elif player == 'player2':
-            piece = YellowPiece(col, row)
 
-        self.game_state[col][row] = pieces[player]
-        self.game_pieces.append(piece)
+    def _check_if_winner(self, state=None):
+        if not state:
+            state = self.game_state
+
+        # Check horizontal
+        for row in range(config.ROWS):
+            for col in range(config.COLS - 3):
+                window = []
+                for i in range(col, col + 4):
+                    window.append(state[i][row])
+                winner = self._check_winning_window(window)
+                if winner:
+                    return winner
+
+        # Check vertical
+        for col in range(config.COLS):
+            for i in range(config.ROWS - 3):
+                window = state[col][i:i + 4]
+                winner = self._check_winning_window(window)
+                if winner:
+                    return winner
+
+        # Check diagonal
+        for col in range(config.COLS):
+            for row in range(config.ROWS):
+                if col + 3 < config.COLS and row < config.ROWS - 3:
+                    window = [state[col + i][row + i] for i in range(4)]
+                    winner = self._check_winning_window(window)
+                    if winner:
+                        return winner
+
+                if row >= 3 and col < config.COLS - 3:
+                    window = [state[col + i][row - i] for i in range(4)]
+                    winner = self._check_winning_window(window)
+                    if winner:
+                        return winner
+        return None
+    
+    def _check_if_board_is_full(self, state=None):
+        """Helper function to check if the board is full"""
+        if not state:
+            state = self.game_state
+        for col in state:
+            if 0 in col:
+                return False
+        return True
 
 
     def _game_over(self, msg='You Lost'):
@@ -194,25 +313,96 @@ class ConnectFour():
         self._exit()
 
 
+    def simulate_moves(self, moves):
+        """Simulates a sequence of moves.
+
+        This functions accepts a single move, or a list of moves.
+        Each move is assumed to be a tupple like this: (col, player)
+
+        Returns:
+            A copy of the resulting game state if all moves are legal
+            False if any move is illegal
+        """
+        new_state = deepcopy(self.game_state)
+        for col, player in moves:
+            row = self._get_next_row(col, state=new_state)
+            if row == -1:
+                return False
+            self._put_piece(player, col, row, new_state)
+             # player, col, row, state
+        return new_state
+
     def register_ai(self, f):
         """Decorator for registering 'external' AI"""
         self.ai = f
 
 
-    def start(self):
+    def start(self, use_ai=False):
         # Game Loop
         while True:
-            for event in pygame.event.get():
-                self._check_quit_event(event)
+            move = None
+            while move is None:
+                self.clock.tick(config.CLOCK_SPEED)
+                for event in pygame.event.get():
+                    self._check_quit_event(event)
 
-                if event.type == pygame.MOUSEMOTION:
-                    self._check_highlighter_event(pygame.mouse.get_pos())
+                    if not use_ai:
+                        if event.type == pygame.MOUSEMOTION:
+                            self._check_highlighter_event(pygame.mouse.get_pos())
+                            self._update_display()
 
-                if event.type == pygame.MOUSEBUTTONUP:
-                    col = self._pos_to_col(pygame.mouse.get_pos())
-                    self._put_piece('player1', col)
-            
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            move = self._pos_to_col(pygame.mouse.get_pos())
+                            if move == -1:
+                                move = None
+                                continue
+                if use_ai:
+                    # Get next move from their AI
+                    pass
+
+            row = self._get_next_row(move)
+            if row > -1:
+                self._put_piece(pieces['player1'], move, row)
+
+            # Update display before performing checks
             self._update_display()
 
+            winner = self._check_if_winner()
+            if winner:
+                if winner == pieces['player1']:
+                    self._game_won()
+                elif winner == pieces['player2']:
+                    self._game_over()
+                else:
+                    raise Exception(f'Unknown winner \'{winner}\'')
+            
+            # If we have no winner, check if board is full and therefore a draw
+            if self._check_if_board_is_full():
+                self._game_over('Draw!')
+            
+            # Game AI moves after player
+            move = self._make_move()
+            row = self._get_next_row(move)
+            if row > -1:
+                self._put_piece(pieces['player2'], move, row)
+
+            # Update display before performing checks
+            self._update_display()
+
+            # First check if we have a winner
+            winner = self._check_if_winner()
+            if winner:
+                if winner == pieces['player1']:
+                    self._game_won()
+                elif winner == pieces['player2']:
+                    self._game_over()
+                else:
+                    raise Exception(f'Unknown winner \'{winner}\'')
+            
+            # If we have no winner, check if board is full and therefore a draw
+            if self._check_if_board_is_full():
+                self._game_over('Draw!')
+
+            # None of the above! Let's continue!
             self.clock.tick(config.CLOCK_SPEED)
     

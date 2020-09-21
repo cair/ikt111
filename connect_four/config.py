@@ -1,11 +1,9 @@
+CLOCK_SPEED = 10
 WIDTH  = 589
 HEIGHT = 540
 PIECE_SIZE = 63 # Hardcoded to fit with background
-
 ROWS = 6
 COLS = 7
 
-D_X = 81   # How much you have to move right each col to fit
-D_y = 80.8 # How much you have to move down each row to fit
-
-CLOCK_SPEED = 10
+DIFFICULTY = 'easy' # easy, medium, hard
+WIN_SEQUENCE = 4 # How many pieces to connect in order to win
