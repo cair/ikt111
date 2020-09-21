@@ -30,7 +30,7 @@ class Highlighter(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(gfx_dir, 'highlight.png'))
         self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = [self.base_x + (self.d_x * column), 55]
+        self.rect.left, self.rect.top = [self.base_x + (self.d_x * column), self.base_y]
 
 class Background(pygame.sprite.Sprite):
     def __init__(self):
@@ -39,24 +39,41 @@ class Background(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = [0, 0]
 
-class RedPiece(pygame.sprite.Sprite):
-    def __init__(self, location):
+class BasePiece(pygame.sprite.Sprite):
+    base_x = 53
+    base_y = 94
+    d_x = 81
+    d_y = 80.8
+
+    def calc_position(self, col, row):
+        x = self.base_x + (self.d_x * col)
+        y = self.base_y + (self.d_y * row)
+        return [x, y]
+
+
+class RedPiece(BasePiece):
+    def __init__(self, col, row):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
         self.rect = self.image.get_rect()
-        self.rect.center = location
-        self.d_x = 81
-        self.d_y = 80.8
+        self.rect.center = self.calc_position(col, row)
 
-class YellowPiece(pygame.sprite.Sprite):
-    def __init__(self, location):
+
+class YellowPiece(BasePiece):
+    def __init__(self, col, row):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(gfx_dir, 'yellow_piece.png'))
         self.rect = self.image.get_rect()
-        self.rect.center = location
-        self.d_x = 81
-        self.d_y = 80.8
-        
+        self.rect.center = self.calc_position(col, row)
+
+class TestPiece(BasePiece):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
+        self.rect = self.image.get_rect()
+        self.rect.center = (53, 94)
+
+
 class ConnectFour():
     def __init__(self):
         self.font_style = pygame.font.SysFont(None, 80)
@@ -65,13 +82,14 @@ class ConnectFour():
         self.display = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Connect Four')
         self.clock = pygame.time.Clock()
-        
+
         self.background = Background()
         self.highlighter = None
 
         self.piece_size = config.PIECE_SIZE
         self.game_pieces = []
-        self.board = [[pieces['board'] for _ in range(config.ROWS)] for _ in range(config.COLS)]
+        self.game_state = [[pieces['board'] for _ in range(config.ROWS)] for _ in range(config.COLS)]
+
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
 
@@ -90,7 +108,7 @@ class ConnectFour():
         self.display.fill(colors['white'])
         self.display.blit(self.background.image, 
                           self.background.rect)
-        
+
         if self.highlighter:
             self.display.blit(self.highlighter.image,
                             self.highlighter.rect)
@@ -98,6 +116,7 @@ class ConnectFour():
         for piece in self.game_pieces:
             self.display.blit(piece.image, piece.rect)
         pygame.display.update()
+
 
     def _exit(self):
         """Helper function to exit the game"""
@@ -136,6 +155,33 @@ class ConnectFour():
         return -1
 
 
+    def _check_if_board_is_full(self):
+        """Helper function to check if the board is full"""
+        for col in self.game_state:
+            if 0 in col:
+                return False
+        return True
+
+
+    def _check_if_col_is_full(self, col):
+        """Helper function to check if a column is full"""
+        return pieces['board'] in col
+
+
+    def _put_piece(self, player, col):
+        """Helper function to insert player pieces on the board"""
+        # Fin first free row
+        row = next((i - 1 for i, r in enumerate(self.game_state[col]) if r != pieces['board']), config.ROWS - 1)
+
+        if player == 'player1':
+            piece = RedPiece(col, row)
+        elif player == 'player2':
+            piece = YellowPiece(col, row)
+
+        self.game_state[col][row] = pieces[player]
+        self.game_pieces.append(piece)
+
+
     def _game_over(self, msg='You Lost'):
         """Helper function to display a loss-condition message"""
         self._display_message(msg)
@@ -161,6 +207,10 @@ class ConnectFour():
 
                 if event.type == pygame.MOUSEMOTION:
                     self._check_highlighter_event(pygame.mouse.get_pos())
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    col = self._pos_to_col(pygame.mouse.get_pos())
+                    self._put_piece('player1', col)
             
             self._update_display()
 
