@@ -40,7 +40,7 @@ class Node:
         moves = []
         node = self
         while node:
-            moves.append((self.move, 1 if self.is_opponent else 2))
+            moves.append((node.move, 1 if node.is_opponent else 2))
             node = node.parent
         moves.reverse()
         return moves
@@ -115,7 +115,8 @@ class ConnectFour():
         self.game_pieces = []
         self.game_state = [[pieces['board'] for _ in range(config.ROWS)] for _ in range(config.COLS)]
 
-        self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
+        #self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
+        self.max_depth = 5
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
 
@@ -226,6 +227,8 @@ class ConnectFour():
                 if winner == pieces['player1']:
                     continue
                 elif winner == pieces['player2']:
+                    print(node.depth)
+                    print(moves)
                     return moves[0][0]
             
             for col in range(config.COLS):
@@ -238,7 +241,9 @@ class ConnectFour():
                     else:
                         open_list.append(child)
     
-        return random.choice(root_moves)
+        rand_move = random.choice(root_moves)
+        print('Random move:', rand_move)
+        return rand_move
 
 
     def _check_if_col_is_full(self, col):
