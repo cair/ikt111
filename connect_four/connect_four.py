@@ -22,14 +22,15 @@ gfx_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gfx')
 
 
 class Highlighter(pygame.sprite.Sprite):
-    def __init__(self):
+    base_x = 12.5
+    base_y = 55
+    d_x = 81.3
+
+    def __init__(self, column):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join(gfx_dir, 'highlight.png'))
         self.rect = self.image.get_rect()
-        self.base_x = 12.5
-        self.base_y = 55
-        self.d_x = 81.3
-        #self.rect.left, self.rect.top = [self.base_x + (self.d_x), 55]
+        self.rect.left, self.rect.top = [self.base_x + (self.d_x * column), 55]
 
 class Background(pygame.sprite.Sprite):
     def __init__(self):
@@ -66,7 +67,7 @@ class ConnectFour():
         self.clock = pygame.time.Clock()
         
         self.background = Background()
-        self.highlighter = Highlighter()
+        self.highlighter = None
 
         self.piece_size = config.PIECE_SIZE
         self.game_pieces = []
@@ -90,8 +91,9 @@ class ConnectFour():
         self.display.blit(self.background.image, 
                           self.background.rect)
         
-        self.display.blit(self.highlighter.image,
-                          self.highlighter.rect)
+        if self.highlighter:
+            self.display.blit(self.highlighter.image,
+                            self.highlighter.rect)
 
         for piece in self.game_pieces:
             self.display.blit(piece.image, piece.rect)
@@ -110,6 +112,28 @@ class ConnectFour():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 self._game_over(msg='Quitting...')
+
+
+    def _check_highlighter_event(self, pos):
+        """Helper function to draw column highligher when hover over"""
+        col = self._pos_to_col(pos)
+        if col == -1:
+            self.highlighter = None
+        else:
+            self.highlighter = Highlighter(col)    
+
+
+    def _pos_to_col(self, pos):
+        x = pos[0]
+        base = Highlighter.base_x
+        d_x = Highlighter.d_x
+
+        if x < base:
+            return -1
+        for i in range(1, 8):
+            if x < (base + (d_x * i)):
+                return i - 1
+        return -1
 
 
     def _game_over(self, msg='You Lost'):
@@ -136,7 +160,7 @@ class ConnectFour():
                 self._check_quit_event(event)
 
                 if event.type == pygame.MOUSEMOTION:
-                    print(pygame.mouse.get_pos())
+                    self._check_highlighter_event(pygame.mouse.get_pos())
             
             self._update_display()
 
