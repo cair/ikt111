@@ -20,6 +20,19 @@ pieces = {
     'player2': 2
 }
 
+score_table = { 
+    pieces['player1']: {
+        (pieces['board'], pieces['board'], pieces['board'], pieces['player1']): 	1/4,
+        (pieces['board'], pieces['board'], pieces['player1'], pieces['player1']): 	2/4,
+        (pieces['board'], pieces['player1'], pieces['player1'], pieces['player1']): 3/4,
+    }, 
+    pieces['player2']: {
+        (pieces['board'], pieces['board'], pieces['board'], pieces['player2']): 	1/4,
+        (pieces['board'], pieces['board'], pieces['player2'], pieces['player2']): 	2/4,
+        (pieces['board'], pieces['player2'], pieces['player2'], pieces['player2']): 3/4,
+    }
+}
+
 difficulty = {'easy': 3, 'medium': 5, 'hard': 7}
 
 gfx_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gfx')
@@ -29,6 +42,7 @@ class Node:
     def __init__(self, move, parent=None):
         self.move = move
         self.parent = parent
+        self.score = 0
         if not parent:
             self.depth = 1
             self.is_opponent = False
@@ -44,6 +58,12 @@ class Node:
             node = node.parent
         moves.reverse()
         return moves
+
+    def root_move(self):
+        node = self
+        while node.parent:
+            node = node.parent
+        return node.move
 
 
 class Highlighter(pygame.sprite.Sprite):
@@ -116,7 +136,7 @@ class ConnectFour():
         self.game_state = [[pieces['board'] for _ in range(config.ROWS)] for _ in range(config.COLS)]
 
         #self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
-        self.max_depth = 5
+        self.max_depth = 3
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
 
@@ -207,49 +227,77 @@ class ConnectFour():
         if state is self.game_state:
             self.game_pieces.append(piece)
 
+    def _valid_cols(self, state=None):
+        """Helper function to find valid cols with open rows given a state"""
+        if not state:
+            state = self.game_state
+        for col in range(config.COLS):
+            row = self._get_next_row(col, state=state)
+            if row > -1:
+                yield col        
+
 
     def _make_move(self):
-        open_list = []
-        root_moves = []
-        for col in range(config.COLS):
-            row = self._get_next_row(col)
-            if row > -1:
-                open_list.append(Node(col))
-                root_moves.append(col)
+        """Game AI"""
+        def generate_children(parent_node, current_state):
+            children = []
+            for col in self._valid_cols(state=current_state):
+                child = Node(col, parent=parent_node)
+                child_state = self.simulate_moves(child.move_list())
+                for window in self._generate_windows(state=child_state):
+                    ## Check if child wins - break if
+                    winner = self._check_winning_window(window)
+                    if winner and winner == pieces['player1']:
+                        parent_node.score = -1
+                        return None
+                    elif winner and winner == pieces['player2']:
+                        raise Exception('Player won on game move - should not happen. Please report bug')
+                    
+                    ## Calculate child score
+                    child.score = max(child.score, score_table[pieces['player1']].get(tuple(window), 0))
+                children.append(child)
+            return max(children, key=lambda x: x.score)
 
+        open_list = []
+        # Populate open_list with root nodes
+        for col in self._valid_cols():
+            open_list.append(Node(col))
+
+        best_node = open_list[0]
         while open_list:
             node = open_list.pop(0)
             moves = node.move_list()
             new_state = self.simulate_moves(moves)
             
-            winner = self._check_if_winner(state=new_state)
-            if winner:
-                if winner == pieces['player1']:
-                    continue
-                elif winner == pieces['player2']:
-                    print(node.depth)
-                    print(moves)
-                    return moves[0][0]
-            
-            for col in range(config.COLS):
-                row = self._get_next_row(col, state=new_state)
-                if row > -1:
-                    child = Node(col, parent=node)
-                    if child.depth > self.max_depth:
-                        open_list = []
-                        break
-                    else:
+            if node.is_opponent:
+                for col in self._valid_cols(state=new_state):
+                    open_list.append(Node(col, parent=node))
+            else:
+                for window in self._generate_windows(state=new_state):
+                    winner = self._check_winning_window(window)
+                    if winner and winner == pieces['player2']:
+                        # We assume any prev. opponent move is their best
+                        return node.root_move()
+                    elif winner and winner == pieces['player1']:
+                        raise Exception('Player won on game move - should not happen. Please report bug')
+                    
+                    node.score = max(node.score, score_table[pieces['player2']].get(tuple(window), 0))
+                        
+                # Create opponent children
+                if node.depth < self.max_depth:
+                    child = generate_children(node, new_state)
+                
+                    if child:
                         open_list.append(child)
-    
-        rand_move = random.choice(root_moves)
-        print('Random move:', rand_move)
-        return rand_move
+                if node.score > best_node.score:
+                    best_node = node
+
+        return best_node.root_move()
 
 
     def _check_if_col_is_full(self, col):
         """Helper function to check if a column is full"""
         return pieces['board'] in col
-
 
     def _check_winning_window(self, window):
         window = set(window)
@@ -257,44 +305,49 @@ class ConnectFour():
             return window.pop()
         return None
 
-
-    def _check_if_winner(self, state=None):
+    def _generate_horizontal_windows(self, state=None):
         if not state:
             state = self.game_state
-
-        # Check horizontal
         for row in range(config.ROWS):
             for col in range(config.COLS - 3):
                 window = []
                 for i in range(col, col + 4):
                     window.append(state[i][row])
-                winner = self._check_winning_window(window)
-                if winner:
-                    return winner
+                yield window
 
-        # Check vertical
+    def _generate_vertical_windows(self, state=None):
+        if not state:
+            state = self.game_state
         for col in range(config.COLS):
             for i in range(config.ROWS - 3):
                 window = state[col][i:i + 4]
-                winner = self._check_winning_window(window)
-                if winner:
-                    return winner
-
-        # Check diagonal
+                yield window
+    
+    def _generate_diagonal_windows(self, state=None):
+        if not state:
+            state = self.game_state
         for col in range(config.COLS):
             for row in range(config.ROWS):
                 if col + 3 < config.COLS and row < config.ROWS - 3:
                     window = [state[col + i][row + i] for i in range(4)]
-                    winner = self._check_winning_window(window)
-                    if winner:
-                        return winner
-
-                if row >= 3 and col < config.COLS - 3:
+                    yield window
+                elif row >= 3 and col < config.COLS - 3:
                     window = [state[col + i][row - i] for i in range(4)]
-                    winner = self._check_winning_window(window)
-                    if winner:
-                        return winner
-        return None
+                    yield window
+                else:
+                    continue
+
+
+    def _generate_windows(self, state=None):
+        if not state:
+            state = self.game_state
+        for window in self._generate_horizontal_windows(state):
+            yield window
+        for window in self._generate_vertical_windows(state):
+            yield window
+        for window in self._generate_diagonal_windows(state):
+            yield window
+        
     
     def _check_if_board_is_full(self, state=None):
         """Helper function to check if the board is full"""
@@ -305,6 +358,19 @@ class ConnectFour():
                 return False
         return True
 
+    def _check_if_winner(self):
+        """Helper function for the game to know if there is a winner"""
+        for window in self._generate_windows():
+            winner = self._check_winning_window(window)
+            if winner:
+                if winner == pieces['player1']:
+                    self._game_won()
+                elif winner == pieces['player2']:
+                    self._game_over()
+                else:
+                    raise Exception(f'Unknown winner \'{winner}\'')
+        if self._check_if_board_is_full():
+            self._game_over('Draw!')
 
     def _game_over(self, msg='You Lost'):
         """Helper function to display a loss-condition message"""
@@ -369,21 +435,8 @@ class ConnectFour():
             if row > -1:
                 self._put_piece(pieces['player1'], move, row)
 
-            # Update display before performing checks
             self._update_display()
-
-            winner = self._check_if_winner()
-            if winner:
-                if winner == pieces['player1']:
-                    self._game_won()
-                elif winner == pieces['player2']:
-                    self._game_over()
-                else:
-                    raise Exception(f'Unknown winner \'{winner}\'')
-            
-            # If we have no winner, check if board is full and therefore a draw
-            if self._check_if_board_is_full():
-                self._game_over('Draw!')
+            self._check_if_winner()
             
             # Game AI moves after player
             move = self._make_move()
@@ -391,22 +444,8 @@ class ConnectFour():
             if row > -1:
                 self._put_piece(pieces['player2'], move, row)
 
-            # Update display before performing checks
             self._update_display()
-
-            # First check if we have a winner
-            winner = self._check_if_winner()
-            if winner:
-                if winner == pieces['player1']:
-                    self._game_won()
-                elif winner == pieces['player2']:
-                    self._game_over()
-                else:
-                    raise Exception(f'Unknown winner \'{winner}\'')
-            
-            # If we have no winner, check if board is full and therefore a draw
-            if self._check_if_board_is_full():
-                self._game_over('Draw!')
+            self._check_if_winner()
 
             # None of the above! Let's continue!
             self.clock.tick(config.CLOCK_SPEED)
