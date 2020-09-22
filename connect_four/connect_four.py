@@ -429,7 +429,10 @@ class ConnectFour():
                                 continue
                 if use_ai:
                     # Get next move from their AI
-                    pass
+                    move = self.ai()
+                    if move == -1:
+                        print(f'Invalid move: {move}')
+                        move = None
 
             row = self._get_next_row(move)
             if row > -1:
