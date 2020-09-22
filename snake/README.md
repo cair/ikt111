@@ -64,7 +64,7 @@ from snake import SnakeGame
 snake = SnakeGame()
 
 @snake.register_ai # Decorator that tells the game to use your function
-def super_ai(game_state):
+def super_ai():
     #
     # Some magic AI stuff here
     #
