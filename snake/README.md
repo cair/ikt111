@@ -1,7 +1,7 @@
 # Project Title
 
 A small implementation of 🐍 that can either be played by a human, or by an AI!  
-Developed as a supplement for IKT111, Univeristy of Agder.
+Developed as a supplement for IKT111, University of Agder.
 
 ## Getting Started
 ### Prerequisites
