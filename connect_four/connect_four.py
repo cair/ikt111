@@ -430,7 +430,7 @@ class ConnectFour():
                 if use_ai:
                     # Get next move from their AI
                     move = self.ai()
-                    if move == -1:
+                    if move < 0 or move > config.COLS:
                         print(f'Invalid move: {move}')
                         move = None
 
