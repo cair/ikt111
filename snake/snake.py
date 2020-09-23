@@ -450,6 +450,7 @@ class SnakeGame:
     def start(self, use_ai=False):
         #self._update_game_state()
         self.snake = self._init_snake()
+        self._update_game_state()
         self.apple = self._get_random_position()
         self._update_display()
 
