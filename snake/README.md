@@ -97,6 +97,9 @@ Returns current posistion of snake head ( in game state coordinates )
 >`get_apple_position()`  
 Returns current posistion of apple ( in game state coordinates )  
 
+>`get_distance(p, q)`  
+Returns the Manhattan Distance between two points `p` and `q`
+
 ### Game state
 The game maintains a representation of the current game state in the form of an $`N\times M`$ matrix where the different game elements are represented by the following values:  
 

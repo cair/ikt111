@@ -439,6 +439,10 @@ class SnakeGame:
         pos = np.where(self.game_state == states['apple'])
         return list(np.hstack(pos))
 
+    def get_distance(self, p, q):
+        """Calculates distance between two points"""
+        return abs(p[0] - q[0]) + abs(p[1] - q[1])
+
     def register_ai(self, f):
         """Decorator for registering 'external' AI"""
         self.ai = f
