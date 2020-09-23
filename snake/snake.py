@@ -462,7 +462,7 @@ class SnakeGame:
                     new_moves = self.ai()
                     if not new_moves:
                         self._game_over()
-                    self.moves = self.ai()
+                    self.moves = new_moves
                 direction = self.moves.pop(0)
                 self._set_direction(direction)
 
