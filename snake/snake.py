@@ -3,7 +3,6 @@ import sys
 import time
 import pygame
 import numpy as np
-import copy
 
 import utils
 import config
@@ -219,7 +218,7 @@ class SnakeGame:
 
     def _move_snake(self):
         """Helper function to move snake position"""
-        snake_head = copy.deepcopy(self.snake[-1])
+        snake_head = self.snake[-1].copy()
         snake_head[0] += self.snake_delta_x
         snake_head[1] += self.snake_delta_y
         self.snake.append(snake_head)
@@ -344,13 +343,17 @@ class SnakeGame:
             bool: True if all the moves are legal
             bool: False if any of the moves end in a loss-condition
         """
-        temp_snake = copy.deepcopy(self.snake)
+        temp_snake = self.snake.copy()
 
         if isinstance(moves, str):
             moves = [moves]
 
         for move in moves:
-            temp_head = copy.deepcopy(temp_snake[-1])
+            # Simulate move by updating temp_snake
+            temp_head = temp_snake[-1].copy()
+            temp_snake.append(temp_head)
+            if len(temp_snake) > self.snake_len:
+                del temp_snake[0]
             
             if move == 'up':
                 temp_head[1] += -self.sprite_size
@@ -374,10 +377,6 @@ class SnakeGame:
             if temp_head in temp_snake[:-1]:
                 return False
 
-            # Simulate move by updating temp_snake
-            temp_snake.append(temp_head)
-            del temp_snake[0]
-
         return True
 
     def is_winning(self, moves):
@@ -389,8 +388,8 @@ class SnakeGame:
             bool: True if the sequence lead to the apple
             bool: False if the sequence does not lead to the apple
         """
-        temp_snake = copy.deepcopy(self.snake)
-        temp_head = temp_snake[-1]
+        temp_snake = self.snake.copy()
+        temp_head = temp_snake[-1].copy()
 
         if isinstance(moves, str):
             moves = [moves]
@@ -416,7 +415,7 @@ class SnakeGame:
 
     def simulate_move(self, pos, move):
         """Simulates a move from the given position, and returns the new position"""
-        new_pos = copy.deepcopy(pos) # Deepcopy just in case to prevent strange pointer errors
+        new_pos = pos.copy()
         if move == 'up':
             new_pos[1] += -1
         elif move == 'down':
@@ -463,10 +462,11 @@ class SnakeGame:
 
             if use_ai:
                 if not self.moves:
-                    new_moves = self.ai()
-                    if not new_moves:
+                    self.moves = self.ai()
+                    if not self.moves:
                         self._game_over()
-                    self.moves = new_moves
+                    if isinstance(self.moves, str):  # For compatibility to older versions
+                        self.moves = [self.moves]
                 direction = self.moves.pop(0)
                 self._set_direction(direction)
 
