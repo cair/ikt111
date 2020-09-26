@@ -14,22 +14,16 @@ colors = {
     'blue':  (0, 0, 255)
 }
 
-pieces = {
-    'board': 0,
-    'player1': 1,
-    'player2': 2
-}
-
 score_table = { 
-    pieces['player1']: {
-        (pieces['board'], pieces['board'], pieces['board'], pieces['player1']): 	1/4,
-        (pieces['board'], pieces['board'], pieces['player1'], pieces['player1']): 	2/4,
-        (pieces['board'], pieces['player1'], pieces['player1'], pieces['player1']): 3/4,
+    config.PLAYER1: {
+        (config.BOARD, config.BOARD, config.BOARD, config.PLAYER1): 	1/4,
+        (config.BOARD, config.BOARD, config.PLAYER1, config.PLAYER1): 	2/4,
+        (config.BOARD, config.PLAYER1, config.PLAYER1, config.PLAYER1): 3/4,
     }, 
-    pieces['player2']: {
-        (pieces['board'], pieces['board'], pieces['board'], pieces['player2']): 	1/4,
-        (pieces['board'], pieces['board'], pieces['player2'], pieces['player2']): 	2/4,
-        (pieces['board'], pieces['player2'], pieces['player2'], pieces['player2']): 3/4,
+    config.PLAYER2: {
+        (config.BOARD, config.BOARD, config.BOARD, config.PLAYER2): 	1/4,
+        (config.BOARD, config.BOARD, config.PLAYER2, config.PLAYER2): 	2/4,
+        (config.BOARD, config.PLAYER2, config.PLAYER2, config.PLAYER2): 3/4,
     }
 }
 
@@ -133,7 +127,10 @@ class ConnectFour():
 
         self.piece_size = config.PIECE_SIZE
         self.game_pieces = []
-        self.game_state = [[pieces['board'] for _ in range(config.ROWS)] for _ in range(config.COLS)]
+        self.board_piece = 0
+        self.player1 = 1
+        self.player2 = 2
+        self.game_state = [[self.board_piece for _ in range(config.ROWS)] for _ in range(config.COLS)]
 
         #self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
         self.max_depth = 3
@@ -206,7 +203,7 @@ class ConnectFour():
         if not state:
             state = self.game_state
         return next((i - 1 for i, r in enumerate(state[col]) 
-                     if r != pieces['board']), # Condition
+                     if r != self.board_piece), # Condition
                      config.ROWS - 1) # Default return value
 
 
@@ -215,9 +212,9 @@ class ConnectFour():
         if not state:
             state = self.game_state
         
-        if player == pieces['player1']:
+        if player == self.player1:
             piece = RedPiece(col, row)
-        elif player == pieces['player2']:
+        elif player == self.player2:
             piece = YellowPiece(col, row)
         else:
             raise Exception(f'Unknown player \'{player}\'')
@@ -247,14 +244,15 @@ class ConnectFour():
                 for window in self._generate_windows(state=child_state):
                     ## Check if child wins - break if
                     winner = self._check_winning_window(window)
-                    if winner and winner == pieces['player1']:
+                    if winner and winner == self.player1:
                         parent_node.score = -1
                         return None
-                    elif winner and winner == pieces['player2']:
+                    elif winner and winner == self.player2:
                         raise Exception('Player won on game move - should not happen. Please report bug')
                     
                     ## Calculate child score
-                    child.score = max(child.score, score_table[pieces['player1']].get(tuple(window), 0))
+                    child.score = max(child.score, score_table[self.player1].get(tuple(window), 0))
+            
                 children.append(child)
             return max(children, key=lambda x: x.score)
 
@@ -275,13 +273,13 @@ class ConnectFour():
             else:
                 for window in self._generate_windows(state=new_state):
                     winner = self._check_winning_window(window)
-                    if winner and winner == pieces['player2']:
+                    if winner and winner == self.player2:
                         # We assume any prev. opponent move is their best
                         return node.root_move()
-                    elif winner and winner == pieces['player1']:
+                    elif winner and winner == self.player1:
                         raise Exception('Player won on game move - should not happen. Please report bug')
                     
-                    node.score = max(node.score, score_table[pieces['player2']].get(tuple(window), 0))
+                    node.score = max(node.score, score_table[self.player2].get(tuple(window), 0))
                         
                 # Create opponent children
                 if node.depth < self.max_depth:
@@ -297,11 +295,11 @@ class ConnectFour():
 
     def _check_if_col_is_full(self, col):
         """Helper function to check if a column is full"""
-        return pieces['board'] in col
+        return self.board_piece in col
 
     def _check_winning_window(self, window):
         window = set(window)
-        if pieces['board'] not in window and len(window) == 1:
+        if self.board_piece not in window and len(window) == 1:
             return window.pop()
         return None
 
@@ -363,9 +361,9 @@ class ConnectFour():
         for window in self._generate_windows():
             winner = self._check_winning_window(window)
             if winner:
-                if winner == pieces['player1']:
+                if winner == self.player1:
                     self._game_won()
-                elif winner == pieces['player2']:
+                elif winner == self.player2:
                     self._game_over()
                 else:
                     raise Exception(f'Unknown winner \'{winner}\'')
@@ -436,8 +434,8 @@ class ConnectFour():
 
             row = self._get_next_row(move)
             if row > -1:
-                self._put_piece(pieces['player1'], move, row)
-
+                self._put_piece(self.player1, move, row)
+        
             self._update_display()
             self._check_if_winner()
             
@@ -445,7 +443,7 @@ class ConnectFour():
             move = self._make_move()
             row = self._get_next_row(move)
             if row > -1:
-                self._put_piece(pieces['player2'], move, row)
+                self._put_piece(self.player2, move, row)
 
             self._update_display()
             self._check_if_winner()

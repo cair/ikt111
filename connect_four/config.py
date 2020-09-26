@@ -5,6 +5,10 @@ PIECE_SIZE = 63 # Hardcoded to fit with background
 ROWS = 6
 COLS = 7
 
+BOARD   =  0
+PLAYER1 = 1
+PLAYER2 = 2
+
 # Not working quite as expected
 # DIFFICULTY = 'medium' # easy, medium, hard
 
