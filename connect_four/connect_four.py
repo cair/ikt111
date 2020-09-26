@@ -139,8 +139,7 @@ class ConnectFour():
         self.player2 = 2
         self.game_state = [[self.board_piece for _ in range(ROWS)] for _ in range(COLS)]
 
-        #self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
-        self.max_depth = 3
+        self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
 
