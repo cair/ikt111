@@ -8,6 +8,13 @@ pygame.init()
 
 import config
 
+CLOCK_SPEED = 10
+WIDTH  = 589
+HEIGHT = 540
+PIECE_SIZE = 63 # Hardcoded to fit with background
+ROWS = 6
+COLS = 7
+
 colors = {
     'black': (0, 0, 0),
     'white': (255, 255, 255),
@@ -116,8 +123,8 @@ class TestPiece(BasePiece):
 class ConnectFour():
     def __init__(self):
         self.font_style = pygame.font.SysFont(None, 80)
-        self.width   = config.WIDTH
-        self.height  = config.HEIGHT
+        self.width   = WIDTH
+        self.height  = HEIGHT
         self.display = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Connect Four')
         self.clock = pygame.time.Clock()
@@ -125,12 +132,12 @@ class ConnectFour():
         self.background = Background()
         self.highlighter = None
 
-        self.piece_size = config.PIECE_SIZE
+        self.piece_size = PIECE_SIZE
         self.game_pieces = []
         self.board_piece = 0
         self.player1 = 1
         self.player2 = 2
-        self.game_state = [[self.board_piece for _ in range(config.ROWS)] for _ in range(config.COLS)]
+        self.game_state = [[self.board_piece for _ in range(ROWS)] for _ in range(COLS)]
 
         #self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
         self.max_depth = 3
@@ -204,7 +211,7 @@ class ConnectFour():
             state = self.game_state
         return next((i - 1 for i, r in enumerate(state[col]) 
                      if r != self.board_piece), # Condition
-                     config.ROWS - 1) # Default return value
+                     ROWS - 1) # Default return value
 
 
     def _put_piece(self, player, col, row, state=None):
@@ -228,7 +235,7 @@ class ConnectFour():
         """Helper function to find valid cols with open rows given a state"""
         if not state:
             state = self.game_state
-        for col in range(config.COLS):
+        for col in range(COLS):
             row = self._get_next_row(col, state=state)
             if row > -1:
                 yield col        
@@ -306,8 +313,8 @@ class ConnectFour():
     def _generate_horizontal_windows(self, state=None):
         if not state:
             state = self.game_state
-        for row in range(config.ROWS):
-            for col in range(config.COLS - 3):
+        for row in range(ROWS):
+            for col in range(COLS - 3):
                 window = []
                 for i in range(col, col + 4):
                     window.append(state[i][row])
@@ -316,20 +323,20 @@ class ConnectFour():
     def _generate_vertical_windows(self, state=None):
         if not state:
             state = self.game_state
-        for col in range(config.COLS):
-            for i in range(config.ROWS - 3):
+        for col in range(COLS):
+            for i in range(ROWS - 3):
                 window = state[col][i:i + 4]
                 yield window
     
     def _generate_diagonal_windows(self, state=None):
         if not state:
             state = self.game_state
-        for col in range(config.COLS):
-            for row in range(config.ROWS):
-                if col + 3 < config.COLS and row < config.ROWS - 3:
+        for col in range(COLS):
+            for row in range(ROWS):
+                if col + 3 < COLS and row < ROWS - 3:
                     window = [state[col + i][row + i] for i in range(4)]
                     yield window
-                elif row >= 3 and col < config.COLS - 3:
+                elif row >= 3 and col < COLS - 3:
                     window = [state[col + i][row - i] for i in range(4)]
                     yield window
                 else:
@@ -411,7 +418,7 @@ class ConnectFour():
         while True:
             move = None
             while move is None:
-                self.clock.tick(config.CLOCK_SPEED)
+                self.clock.tick(CLOCK_SPEED)
                 for event in pygame.event.get():
                     self._check_quit_event(event)
 
@@ -428,7 +435,7 @@ class ConnectFour():
                 if use_ai:
                     # Get next move from their AI
                     move = self.ai()
-                    if move < 0 or move > config.COLS:
+                    if move < 0 or move > COLS:
                         print(f'Invalid move: {move}')
                         move = None
 
@@ -449,5 +456,5 @@ class ConnectFour():
             self._check_if_winner()
 
             # None of the above! Let's continue!
-            self.clock.tick(config.CLOCK_SPEED)
+            self.clock.tick(CLOCK_SPEED)
     
