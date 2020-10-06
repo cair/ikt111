@@ -442,6 +442,25 @@ class ConnectFour():
         return columns
 
 
+    def is_winner(self, player, state):
+        """Checks if a given player wins the game in a given game state
+
+        Args:
+            player: The player to check win condition for
+            state: A copy of the game state
+
+        Returns:
+            bool: True if the player wins, else False
+        """
+        if not state:
+            state = self.game_state
+        for window in self._generate_windows(state=state):
+            winner = self._check_winning_window(window)
+            if winner == player:
+                return True
+        return False
+
+
 
 
     def start(self, use_ai=False):
