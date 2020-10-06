@@ -143,6 +143,11 @@ class ConnectFour():
         self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
 
 
+    def register_ai(self, f):
+        """Decorator for registering 'external' AI"""
+        self.ai = f
+
+
     def _display_message(self, msg, color=colors['black']):
         """Helper function to show message on display"""
         message = self.font_style.render(msg, True, color)
