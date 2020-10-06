@@ -193,6 +193,7 @@ class ConnectFour():
 
 
     def _pos_to_col(self, pos):
+        """Helper function to convert a position into its corresponding column"""
         x = pos[0]
         base = Highlighter.base_x
         d_x = Highlighter.d_x
@@ -206,6 +207,7 @@ class ConnectFour():
 
 
     def _get_next_row(self, col, state=None):
+        """Helper function to get the next free row in a given column and state"""
         if not state:
             state = self.game_state
         return next((i - 1 for i, r in enumerate(state[col]) 
@@ -310,6 +312,7 @@ class ConnectFour():
         return None
 
     def _generate_horizontal_windows(self, state=None):
+        """Helper function that will yield all possible horizontal windows in a given state"""
         if not state:
             state = self.game_state
         for row in range(ROWS):
@@ -320,6 +323,7 @@ class ConnectFour():
                 yield window
 
     def _generate_vertical_windows(self, state=None):
+        """Helper function that will yield all possible vertical windows in a given state"""
         if not state:
             state = self.game_state
         for col in range(COLS):
@@ -328,6 +332,7 @@ class ConnectFour():
                 yield window
     
     def _generate_diagonal_windows(self, state=None):
+        """Helper function that will yield all possible diagonal windows in a given state"""
         if not state:
             state = self.game_state
         for col in range(COLS):
@@ -343,6 +348,7 @@ class ConnectFour():
 
 
     def _generate_windows(self, state=None):
+        """Helper function that wraps the different 'generate windows' functions"""
         if not state:
             state = self.game_state
         for window in self._generate_horizontal_windows(state):
