@@ -461,6 +461,23 @@ class ConnectFour():
         return False
 
 
+    def get_heuristic(self, state):
+        """Calculate a heuristic given a state
+
+        Args:
+            state: Copy of a game state
+
+        Returns:
+            float: Heuristic of the given state
+        """
+        player_1_max = max([self._get_score(self.player1, window)
+                            for window in self._generate_windows(state=state)])
+
+        player_2_max = max([self._get_score(self.player2, window)
+                            for window in self._generate_windows(state=state)])
+
+        h = player_2_max - player_1_max
+        return h
 
 
     def start(self, use_ai=False):
