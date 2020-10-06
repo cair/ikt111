@@ -450,8 +450,6 @@ class ConnectFour():
         Returns:
             bool: True if the player wins, else False
         """
-        if not state:
-            state = self.game_state
         for window in self._generate_windows(state=state):
             winner = self._check_winning_window(window)
             if winner == player:
