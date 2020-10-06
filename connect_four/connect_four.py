@@ -239,7 +239,14 @@ class ConnectFour():
         for col in range(COLS):
             row = self._get_next_row(col, state=state)
             if row > -1:
-                yield col        
+                yield col
+
+
+    def _get_score(self, player, window):
+        """Helper function to get the score for a given player and window"""
+        if isinstance(window, list):
+            window = tuple(window)
+        return score_table[player].get(window, 0)
 
 
     def _make_move(self):
