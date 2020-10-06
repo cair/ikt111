@@ -85,10 +85,14 @@ Simulates a sequence of moves and returns a copy of the resulting game state as 
 _NB!_ `moves` _has to be a list of tuples where the first element is the column number ( move ), and the second element is either_ `game.player1` _( You ) or_ `game.player2` _( The game ). The list should alternate between players_  
 _Example:_ `moves = [(0, game.player1), (1, game.player2), (1, game.player1)]`
 
->`is_winning(moves)`  
-Check if a sequence of moves leads to you winning the game, and will return `True` if win, and `False` for all other cases.  
-_NB!_ `moves` _has to be a list of tuples where the first element is the column number ( move ), and the second element is either_ `game.player1` _( You ) or_ `game.player2` _( The game ). The list should alternate between players_  
-_Example:_ `moves = [(0, game.player1), (1, game.player2), (1, game.player1)]`
+>`get_all_valid_cols(state=None)`  
+Returns all valid columns in a given game state. You can choose to not provide a game state to the function, in which case the current game state of the game will be used.
+
+>`is_winner(player, state)`  
+Check if a given player has a win condition in a given game state.
+
+>`get_heuristic(state)`  
+Calculates and returns a heuristic for a given game state
 
 ### Game state
 The game maintains a representation of the current game state in the form of an $`N\times M`$ matrix where the different game elements are represented by the following values:  
