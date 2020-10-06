@@ -437,14 +437,7 @@ class ConnectFour():
         Returns:
             list: A list of all available columns
         """
-        if not state:
-            state = self.game_state
-        columns = []
-        for col in range(COLS):
-            row = self._get_next_row(col, state=state)
-            if row > -1:
-                columns.append(col)
-        return columns
+        return [col for col in self._valid_cols(state=state)]
 
 
     def is_winner(self, player, state):
