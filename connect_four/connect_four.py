@@ -422,7 +422,6 @@ class ConnectFour():
             if row == -1:
                 return False
             self._put_piece(player, col, row, new_state)
-             # player, col, row, state
         return new_state
     
 
