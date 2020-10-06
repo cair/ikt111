@@ -419,10 +419,29 @@ class ConnectFour():
             self._put_piece(player, col, row, new_state)
              # player, col, row, state
         return new_state
+    
 
-    def register_ai(self, f):
-        """Decorator for registering 'external' AI"""
-        self.ai = f
+    def get_all_valid_cols(self, state=None):
+        """This function will return all valid columns given a state.
+
+        If a state is not given, the function will use the current state of the game.
+
+        Args:
+            state: A copy of the game state
+
+        Returns:
+            list: A list of all available columns
+        """
+        if not state:
+            state = self.game_state
+        columns = []
+        for col in range(COLS):
+            row = self._get_next_row(col, state=state)
+            if row > -1:
+                columns.append(col)
+        return columns
+
+
 
 
     def start(self, use_ai=False):
