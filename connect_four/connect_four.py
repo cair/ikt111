@@ -471,7 +471,7 @@ class ConnectFour():
         player_2_max = max([self._get_score(self.player2, window)
                             for window in self._generate_windows(state=state)])
 
-        h = player_2_max - player_1_max
+        h = player_1_max - player_2_max
         return h
 
 
