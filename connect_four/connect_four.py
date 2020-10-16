@@ -71,17 +71,16 @@ class Highlighter(pygame.sprite.Sprite):
     base_x = 12.5
     base_y = 55
     d_x = 81.3
-
+    image = pygame.image.load(os.path.join(gfx_dir, 'highlight.png'))
     def __init__(self, column):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(gfx_dir, 'highlight.png'))
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = [self.base_x + (self.d_x * column), self.base_y]
 
 class Background(pygame.sprite.Sprite):
+    image = pygame.image.load(os.path.join(gfx_dir, 'background.png'))
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(gfx_dir, 'background.png'))
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = [0, 0]
 
@@ -98,24 +97,24 @@ class BasePiece(pygame.sprite.Sprite):
 
 
 class RedPiece(BasePiece):
+    image = pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
     def __init__(self, col, row):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
         self.rect = self.image.get_rect()
         self.rect.center = self.calc_position(col, row)
 
 
 class YellowPiece(BasePiece):
+    image = pygame.image.load(os.path.join(gfx_dir, 'yellow_piece.png'))
     def __init__(self, col, row):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(gfx_dir, 'yellow_piece.png'))
         self.rect = self.image.get_rect()
         self.rect.center = self.calc_position(col, row)
 
 class TestPiece(BasePiece):
+    image =  pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
         self.rect = self.image.get_rect()
         self.rect.center = (53, 94)
 
