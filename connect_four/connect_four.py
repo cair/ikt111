@@ -475,6 +475,7 @@ class ConnectFour():
 
 
     def start(self, use_ai=False):
+        self._update_display()
         # Game Loop
         while True:
             move = None
