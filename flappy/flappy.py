@@ -1,24 +1,11 @@
 import time
-from math import radians, sin, cos
 import random
 import pygame
-from utils import *
+from config import *
+from utils import colors
+from bird import Bird
 pygame.init()
 
-WIDTH = 800
-HEIGHT = 600
-CLOCK_SPEED = 10
-
-MAX_LIFE = 600
-
-colors = {
-    'red': (255, 0, 0),
-    'green': (0, 255, 0),
-    'blue': (0, 0, 255),
-    'black': (0, 0, 0),
-    'gray': (100, 100, 100),
-    'white': (255, 255, 255),
-}
 
 class Obstacle():
     def __init__(self, pos_x, pos_y):
@@ -27,55 +14,15 @@ class Obstacle():
         self.rect = pygame.Rect(pos_x, pos_y, self.width, self.height)
         self.color = colors['black']
 
-class Player():
-    def __init__(self):
-        self.position = [0, HEIGHT]
-
-        self.angle = 135#random.uniform(0, 360)
-
-        self.angle = generate_random_angle_sequence(MAX_LIFE)
-        self.velocity = [generate_random_force_vector(angle) for angle in self.angle]
-        self.alive = True
-
-        #List of (angle,radius) pairs.
-        self.rel_points = [[0, 20], [-140, 20], [180, 7.5], [140, 20]]
-        scale = 0.5
-        for i in range(len(self.rel_points)):
-            self.rel_points[i] = (radians(self.rel_points[i][0]), scale * self.rel_points[i][1])
-
-    def update(self, dt, i):
-        self.position[0] += self.velocity[i][0] * dt
-        self.position[1] += self.velocity[i][1] * dt
-
-        # Check if out of bounds
-        if self.position[0] < 0:
-            self.alive = False
-        elif self.position[0] > WIDTH:
-            self.alive = False
-        elif self.position[1] < 0:
-            self.alive = False
-        elif self.position[1] > HEIGHT:
-            self.alive = False
-        else:
-            # It survives for now!
-            pass
-
-        self.real_points = []
-        for point_angle, point_radius in self.rel_points:
-            angle = radians(self.angle[i]) + point_angle
-            xp = point_radius * sin(angle)
-            yp = point_radius * cos(angle)
-            self.real_points.append((
-                self.position[0] + xp,
-                self.position[1] + yp
-            ))
 
 class Flappy:
     def __init__(self):
-        self.font_style = pygame.font.SysFont(None, 80)
+        self.messages_font = pygame.font.SysFont(None, 80)
+        self.stats_font = pygame.font.SysFont(None, 26)
         self.width   = WIDTH
-        self.height  = HEIGHT
+        self.height  = HEIGHT + 200
         self.display = pygame.display.set_mode((self.width, self.height))
+
         pygame.display.set_caption('Evolutionary Birds')
         self.clock = pygame.time.Clock()
 
@@ -87,40 +34,100 @@ class Flappy:
 
         size = 50
         self.goal = pygame.Rect(WIDTH - size, HEIGHT - size, size, size)
-        self.players = [Player() for _ in range(100)]
+        self.birds = []
+
+        self.stats = {}
+
         self.ai = None
 
     def _update_display(self):
         """Helper function to update pygame display"""
+        # Fill background white first...
         self.display.fill(colors['white'])
 
+        # ... Then fill stats-area black
+        self.display.fill(colors['black'], (0, HEIGHT, WIDTH, 200))
+        
+        # Draw obstacles
         for obstacle in self.obstacles:
             pygame.draw.rect(self.display,
                              (obstacle.color),
                              obstacle.rect)
         
+        # Draw goal
         pygame.draw.rect(self.display,
                          colors['green'],
                          self.goal)
 
-        for player in self.players:
+        # Draw birds
+        for bird in self.birds:
             pygame.draw.aalines(self.display,
                                 colors['black'],
                                 True,
-                                player.real_points,
+                                bird.real_points,
                                 True)
+        
+        # Display stats
+        self._display_stats()
 
         pygame.display.update()
 
 
     def _display_message(self, msg, color=colors['blue']):
         """Helper function to show message on display"""
-        message = self.font_style.render(msg, True, color)
+        message = self.messages_font.render(msg, True, color)
         message_rect = message.get_rect(center=(self.width / 2, self.height / 2))
 
         self.display.blit(message, message_rect)
         pygame.display.update()
         time.sleep(1)
+
+
+    def _display_stats(self):
+        """Helper function to draw stats on the screen"""    
+        color = colors['white']
+        elements = []
+
+        # Generation
+        text = self.stats_font.render(f'Generation: {self.stats["generation"]}', True, color)
+        text_rect = text.get_rect(left=20, top=HEIGHT + 20)
+        elements.append((text, text_rect))
+
+        # Lifespan
+        text = self.stats_font.render(f'Lifespan: {self.stats["lifespan"]}', True, color)
+        text_rect = text.get_rect(left=20, top=HEIGHT + 50)
+        elements.append((text, text_rect))
+
+        text = self.stats_font.render(f'/ {MAX_LIFE}', True, color)
+        text_rect = text.get_rect(left=130 if self.stats['lifespan'] < 100 else 137,
+                                  top=HEIGHT + 50)
+        elements.append((text, text_rect))
+
+        num_dead = sum(1 for bird in self.birds if not bird.alive)
+        # Birds alive
+        text = self.stats_font.render(f'Birds alive: {len(self.birds) - num_dead}', True, color)
+        text_rect = text.get_rect(left=250, top=HEIGHT + 20)
+        elements.append((text, text_rect))
+
+        # Birds dead
+        text = self.stats_font.render(f'Birds dead: {num_dead}', True, color)
+        text_rect = text.get_rect(left=250, top=HEIGHT + 50)
+        elements.append((text, text_rect))
+        
+        # Highest fitness
+        text = self.stats_font.render(f'Highest fitness:', True, color)
+        text_rect = text.get_rect(left=480, top=HEIGHT + 20)
+        elements.append((text, text_rect))
+
+        # Avg. fitness
+        text = self.stats_font.render(f'Average fitness:', True, color)
+        text_rect = text.get_rect(left=480, top=HEIGHT + 50)
+        elements.append((text, text_rect))
+
+
+
+        for element in elements:
+            self.display.blit(*element)
 
 
     def _exit(self):
@@ -154,35 +161,37 @@ class Flappy:
         """Decorator for registering 'external' AI"""
         self.ai = f
 
+
     def start(self):
         target_fps = 60
         dt = 1.0/float(target_fps)
         
         # Start game loop
-        counter = 0
+        self.stats['generation'] = 1
         while True:
-            for event in pygame.event.get():
-                self._check_quit_event(event)
+            self.stats['lifespan'] = 0
+            
+            self.birds = self.ai(self.birds)
+            if not self.birds:
+                self._game_over('No birds left in population!')
 
+            for bird in self.birds:
+                bird._reset_position()
+            
+            while self.stats['lifespan'] < MAX_LIFE:
+                # Process user input
+                for event in pygame.event.get():
+                    self._check_quit_event(event)
 
-            # RANDOM PLAYER MOVEMENT
-            for player in self.players:
-                if not player.alive: continue
-                player.update(dt, counter)
+                # Process birds
+                for bird in self.birds:
+                    if not bird.alive: continue
+                    bird._update(dt, self.stats['lifespan'])
+                    bird._check_collide_obstacle(self.obstacles)
+                    bird._check_collide_goal(self.goal)
 
-                # Check collision with obstacle
-                for obstacle in self.obstacles:
-                    for point in player.real_points:
-                        if obstacle.rect.collidepoint(point):
-                            player.alive = False
-                            break
-                    else:
-                        continue
-                    break
+                self._update_display()
+                self.clock.tick(target_fps)
 
-            self._update_display()
-            self.clock.tick(target_fps)
-            print(counter)
-            counter += 1
-            if counter == MAX_LIFE:
-                self._game_over()
+                self.stats['lifespan'] += 1
+            self.stats['generation'] += 1
