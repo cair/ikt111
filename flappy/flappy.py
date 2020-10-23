@@ -70,7 +70,7 @@ class Player():
                 self.position[1] + yp
             ))
 
-class Birds:
+class Flappy:
     def __init__(self):
         self.font_style = pygame.font.SysFont(None, 80)
         self.width   = WIDTH
