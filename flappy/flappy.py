@@ -1,3 +1,4 @@
+import math
 import time
 import random
 import pygame
@@ -20,7 +21,7 @@ class Flappy:
         self.messages_font = pygame.font.SysFont(None, 80)
         self.stats_font = pygame.font.SysFont(None, 26)
         self.width   = WIDTH
-        self.height  = HEIGHT + 200
+        self.height  = HEIGHT + STATS_HEIGHT
         self.display = pygame.display.set_mode((self.width, self.height))
 
         pygame.display.set_caption('Evolutionary Birds')
@@ -34,6 +35,7 @@ class Flappy:
 
         size = 50
         self.goal = pygame.Rect(WIDTH - size, HEIGHT - size, size, size)
+        self.goal_position = self.goal.center
         self.birds = []
 
         self.stats = {}
@@ -45,8 +47,9 @@ class Flappy:
         # Fill background white first...
         self.display.fill(colors['white'])
 
-        # ... Then fill stats-area black
-        self.display.fill(colors['black'], (0, HEIGHT, WIDTH, 200))
+        # ... Then fill stats-area black and draw them
+        self.display.fill(colors['black'], (0, HEIGHT, WIDTH, STATS_HEIGHT))
+        self._display_stats()
         
         # Draw obstacles
         for obstacle in self.obstacles:
@@ -66,10 +69,15 @@ class Flappy:
                                 True,
                                 bird.real_points,
                                 True)
-        
-        # Display stats
-        self._display_stats()
 
+        # Draw best, alive bird in another color
+        self.birds.sort(key=lambda bird: bird.fitness)
+        bird = next(b for b in self.birds if b.alive)
+        pygame.draw.aalines(self.display,
+                            colors['red'],
+                            True,
+                            bird.real_points,
+                            True)
         pygame.display.update()
 
 
@@ -115,16 +123,19 @@ class Flappy:
         elements.append((text, text_rect))
         
         # Highest fitness
-        text = self.stats_font.render(f'Highest fitness:', True, color)
+        text = self.stats_font.render(f'Best fitness: {self.stats["min_fitness"]:.2f}', True, color)
         text_rect = text.get_rect(left=480, top=HEIGHT + 20)
         elements.append((text, text_rect))
 
         # Avg. fitness
-        text = self.stats_font.render(f'Average fitness:', True, color)
+        text = self.stats_font.render(f'Average fitness: {self.stats["mean_fitness"]:.2f}', True, color)
         text_rect = text.get_rect(left=480, top=HEIGHT + 50)
         elements.append((text, text_rect))
 
-
+        # FPS
+        text = self.stats_font.render(f'FPS: {self.clock.get_fps():.0f}', True, color)
+        text_rect = text.get_rect(left=WIDTH - 80, top=HEIGHT + STATS_HEIGHT - 30)
+        elements.append((text, text_rect))
 
         for element in elements:
             self.display.blit(*element)
@@ -156,6 +167,11 @@ class Flappy:
             if event.key == pygame.K_q:
                 self._game_over(msg='Quitting...')
 
+    
+    def _generate_initial_population(self):
+        """Helper function to generate the initial population of birds"""
+        return [Bird() for _ in range(MAX_POPULATION)]
+            
 
     def register_ai(self, f):
         """Decorator for registering 'external' AI"""
@@ -166,18 +182,15 @@ class Flappy:
         target_fps = 60
         dt = 1.0/float(target_fps)
         
+        # Create initial population
+        self.birds = self._generate_initial_population()
+
         # Start game loop
         self.stats['generation'] = 1
         while True:
-            self.stats['lifespan'] = 0
-            
-            self.birds = self.ai(self.birds)
-            if not self.birds:
-                self._game_over('No birds left in population!')
 
-            for bird in self.birds:
-                bird._reset_position()
-            
+            # Simulate population
+            self.stats['lifespan'] = 0
             while self.stats['lifespan'] < MAX_LIFE:
                 # Process user input
                 for event in pygame.event.get():
@@ -187,11 +200,35 @@ class Flappy:
                 for bird in self.birds:
                     if not bird.alive: continue
                     bird._update(dt, self.stats['lifespan'])
+                    bird._check_out_of_bounds()
                     bird._check_collide_obstacle(self.obstacles)
                     bird._check_collide_goal(self.goal)
+                    bird.calculate_fitness(self.goal_position)
+
+                fitness_list = [bird.fitness for bird in self.birds]
+                self.stats['min_fitness'] = min(fitness_list)
+                self.stats['mean_fitness'] = sum(fitness_list) / len(fitness_list)
 
                 self._update_display()
                 self.clock.tick(target_fps)
 
                 self.stats['lifespan'] += 1
+
+            # Simulation done - hand-off to Darwin
+            self.birds = self.ai(self.birds)
+
+            # Check for correct type
+            if not isinstance(self.birds, list):
+                print(f'Algorithm did not return a list! Got \'{type(self.birds)}\' instead')
+                self._game_over('Error!')
+
+            # Stop game if algorithm returns an empty array
+            if not self.birds:
+                print('Algorithm returned an empty population!')
+                self._game_over('Error!')
+
+            # Reset all birds' first position so they start with the correct angle
+            for bird in self.birds:
+                bird._reset()
+
             self.stats['generation'] += 1

@@ -1,5 +1,6 @@
 import math
 import random
+from functools import lru_cache
 
 colors = {
     'red': (255, 0, 0),
@@ -10,14 +11,22 @@ colors = {
     'white': (255, 255, 255),
 }
 
-def generate_random_force_vector(angle):
-    force = random.uniform(50, 150)
-    return [force * math.sin(math.radians(angle)),
-            force * math.cos(math.radians(angle))]
+def generate_random_force():
+    return [random.randint(-4, 4),
+            random.randint(-4, 4)]
 
-def generate_random_angle_sequence(n):
-    angles = [135]
-    for i in range(1, n):
-        delta = random.randint(-4, 4)
-        angles.append(angles[i - 1] + delta)
-    return angles
+
+def get_angle_between_points(d_x, d_y):
+    return math.atan2(d_x, d_y) * 180 / math.pi
+
+@lru_cache(maxsize=10)
+def calculate_rel_points(scale=0.5):
+    # List of (angle,radius) pairs.
+    rel_points = [[0, 20], [-140, 20], [180, 7.5], [140, 20]]
+    for i in range(len(rel_points)):
+        rel_points[i] = (math.radians(rel_points[i][0]), scale * rel_points[i][1])
+    return rel_points
+
+
+def calculate_euclidian_distance(bird_pos, goal_pos):
+    return math.sqrt(sum([(a - b) ** 2 for a, b in zip(bird_pos, goal_pos)]))

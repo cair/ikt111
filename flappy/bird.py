@@ -1,30 +1,59 @@
 from math import radians, sin, cos
 from config import *
-from utils import generate_random_angle_sequence, generate_random_force_vector
+from utils import *
 
 class Bird():
     def __init__(self):
-        self.angle = generate_random_angle_sequence(MAX_LIFE)
-        self.velocity = [generate_random_force_vector(angle) for angle in self.angle]
+        self.fitness = 0
         self.alive = True
+        self.velocity = [0, 0]
+        self.angle = START_ANGLE
+        self.position = START_POS
+        self.genes = [generate_random_force() for _ in range(MAX_LIFE)]
+        self._reset()
 
-        #List of (angle,radius) pairs.
-        self.rel_points = [[0, 20], [-140, 20], [180, 7.5], [140, 20]]
-        scale = 0.5
-        for i in range(len(self.rel_points)):
-            self.rel_points[i] = (radians(self.rel_points[i][0]), scale * self.rel_points[i][1])
+        self.rel_points = calculate_rel_points()
 
-    def _reset_position(self):
-        self.position = [0, HEIGHT]
-        self.angle[0] = 135
-        self.velocity[0] = generate_random_force_vector(self.angle[0])
+    def _reset(self):
+        """Helper function to reset the birds' position back to start"""
+        self.fitness = 0
+        self.alive = True
+        self.velocity = [0, 0]
+        self.angle = START_ANGLE
+        self.position = START_POS
+        
 
     def _update(self, dt, i):
         """Helper function to update bird position and rotation"""
-        self.position[0] += self.velocity[i][0] * dt
-        self.position[1] += self.velocity[i][1] * dt
+        self.velocity[0] += self.genes[i][0]
+        self.velocity[1] += self.genes[i][1]
 
-        # Check if out of bounds
+        new_position = [self.position[0] + self.velocity[0] * dt,
+                        self.position[1] + self.velocity[1] * dt]
+
+        self.angle = self._calculate_new_angle(new_position)
+        
+        self.position = new_position
+
+        self.real_points = []
+        for point_angle, point_radius in self.rel_points:
+            angle = radians(self.angle) + point_angle
+            xp = point_radius * sin(angle)
+            yp = point_radius * cos(angle)
+            self.real_points.append((
+                self.position[0] + xp,
+                self.position[1] + yp
+            ))
+
+
+    def _calculate_new_angle(self, new_position):
+        d_x = new_position[0] - self.position[0]
+        d_y = new_position[1] - self.position[1]
+        return get_angle_between_points(d_x, d_y)
+
+
+    def _check_out_of_bounds(self):
+        """Helper function to check if bird tries to leave the game"""
         if self.position[0] < 0:
             self.alive = False
         elif self.position[0] > WIDTH:
@@ -37,17 +66,6 @@ class Bird():
             # It survives for now!
             pass
 
-        self.real_points = []
-        for point_angle, point_radius in self.rel_points:
-            angle = radians(self.angle[i]) + point_angle
-            xp = point_radius * sin(angle)
-            yp = point_radius * cos(angle)
-            self.real_points.append((
-                self.position[0] + xp,
-                self.position[1] + yp
-            ))
-
-    
     def _check_collide_obstacle(self, obstacles):
         """Helper function to check if bird collides with an obstacle"""
         for obstacle in obstacles:
@@ -70,3 +88,8 @@ class Bird():
             if rect.collidepoint(point):
                 return True
         return False
+
+
+    def calculate_fitness(self, goal_position):
+        """Calculates fitness based on distance to goal and time alive ( Lower is better )"""
+        self.fitness = calculate_euclidian_distance(self.position, goal_position)
