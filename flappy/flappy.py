@@ -216,6 +216,7 @@ class Flappy:
 
             # Simulation done - hand-off to Darwin
             self.birds = self.ai(self.birds)
+            self.birds = self.birds[:MAX_POPULATION]
 
             # Check for correct type
             if not isinstance(self.birds, list):
