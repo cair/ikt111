@@ -71,7 +71,7 @@ class Flappy:
                                 True)
 
         # Draw best, alive bird in another color
-        self.birds.sort(key=lambda bird: bird.fitness)
+        self.birds.sort(key=lambda bird: bird.fitness, reverse=True)
         bird = next(b for b in self.birds if b.alive)
         pygame.draw.aalines(self.display,
                             colors['red'],
@@ -123,12 +123,12 @@ class Flappy:
         elements.append((text, text_rect))
         
         # Highest fitness
-        text = self.stats_font.render(f'Best fitness: {self.stats["min_fitness"]:.2f}', True, color)
+        text = self.stats_font.render(f'Best fitness: {self.stats["best_fitness"]:.4f}', True, color)
         text_rect = text.get_rect(left=480, top=HEIGHT + 20)
         elements.append((text, text_rect))
 
         # Avg. fitness
-        text = self.stats_font.render(f'Average fitness: {self.stats["mean_fitness"]:.2f}', True, color)
+        text = self.stats_font.render(f'Average fitness: {self.stats["mean_fitness"]:.4f}', True, color)
         text_rect = text.get_rect(left=480, top=HEIGHT + 50)
         elements.append((text, text_rect))
 
@@ -206,7 +206,7 @@ class Flappy:
                     bird.calculate_fitness(self.goal_position)
 
                 fitness_list = [bird.fitness for bird in self.birds]
-                self.stats['min_fitness'] = min(fitness_list)
+                self.stats['best_fitness'] = max(fitness_list)
                 self.stats['mean_fitness'] = sum(fitness_list) / len(fitness_list)
 
                 self._update_display()

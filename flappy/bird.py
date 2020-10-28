@@ -92,4 +92,6 @@ class Bird():
 
     def calculate_fitness(self, goal_position):
         """Calculates fitness based on distance to goal and time alive ( Lower is better )"""
-        self.fitness = calculate_euclidian_distance(self.position, goal_position)
+        euclidian = calculate_euclidian_distance(self.position, goal_position)
+        fitness = (1 + (1 / euclidian)) ** 8
+        self.fitness = fitness
