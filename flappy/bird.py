@@ -6,6 +6,7 @@ class Bird():
     def __init__(self):
         self.fitness = 0
         self.alive = True
+        self.winner = False
         self.velocity = [0, 0]
         self.angle = START_ANGLE
         self.position = START_POS
@@ -78,6 +79,7 @@ class Bird():
         """Helper function to check if bird reached goal"""
         if self._check_collide_rect(goal):
             self.alive = False
+            self.winner = True
             return True
         return False            
 
@@ -90,8 +92,22 @@ class Bird():
         return False
 
 
-    def calculate_fitness(self, goal_position):
-        """Calculates fitness based on distance to goal and time alive ( Lower is better )"""
-        euclidian = calculate_euclidian_distance(self.position, goal_position)
-        fitness = (1 + (1 / euclidian)) ** 8
+    def calculate_fitness(self, goal_pos, score):
+        """Calculates fitness based on distance to goal and time alive"""
+        euclidian = calculate_euclidian_distance(self.position, goal_pos)
+
+        # Preffer birds getting closer:
+        fitness = (MAX_DIST - euclidian) ** 1.05
+         
+        # Reward fast birds:
+        fitness += (MAX_LIFE - score)
+
+        if self.winner:
+            # If bird won, give extra score
+            fitness *= 1.1
+        
+        # If bird collided, remove all score
+        elif not self.alive:
+            fitness = 0
+        
         self.fitness = fitness

@@ -72,12 +72,16 @@ class Flappy:
 
         # Draw best, alive bird in another color
         self.birds.sort(key=lambda bird: bird.fitness, reverse=True)
-        bird = next(b for b in self.birds if b.alive)
-        pygame.draw.aalines(self.display,
-                            colors['red'],
-                            True,
-                            bird.real_points,
-                            True)
+        try:
+            bird = next(b for b in self.birds if b.alive)
+        except StopIteration:
+            pass
+        else:
+            pygame.draw.aalines(self.display,
+                                colors['red'],
+                                True,
+                                bird.real_points,
+                                True)
         pygame.display.update()
 
 
@@ -111,9 +115,16 @@ class Flappy:
                                   top=HEIGHT + 50)
         elements.append((text, text_rect))
 
-        num_dead = sum(1 for bird in self.birds if not bird.alive)
+        num_winners = 0
+        num_dead = 0
+        for bird in self.birds:
+            if not bird.alive:
+                if bird.winner:
+                    num_winners += 1
+                else:
+                    num_dead += 1
         # Birds alive
-        text = self.stats_font.render(f'Birds alive: {len(self.birds) - num_dead}', True, color)
+        text = self.stats_font.render(f'Birds alive: {len(self.birds) - (num_dead + num_winners)}', True, color)
         text_rect = text.get_rect(left=250, top=HEIGHT + 20)
         elements.append((text, text_rect))
 
@@ -121,14 +132,19 @@ class Flappy:
         text = self.stats_font.render(f'Birds dead: {num_dead}', True, color)
         text_rect = text.get_rect(left=250, top=HEIGHT + 50)
         elements.append((text, text_rect))
+
+        # Winners
+        text = self.stats_font.render(f'Winners: {num_winners}', True, color)
+        text_rect = text.get_rect(left=250, top=HEIGHT + 80)
+        elements.append((text, text_rect))
         
-        # Highest fitness
-        text = self.stats_font.render(f'Best fitness: {self.stats["best_fitness"]:.4f}', True, color)
+        # Best fitness
+        text = self.stats_font.render(f'Best fitness: {self.stats["best_fitness"]:.0f}', True, color)
         text_rect = text.get_rect(left=480, top=HEIGHT + 20)
         elements.append((text, text_rect))
 
         # Avg. fitness
-        text = self.stats_font.render(f'Average fitness: {self.stats["mean_fitness"]:.4f}', True, color)
+        text = self.stats_font.render(f'Average fitness: {self.stats["mean_fitness"]:.0f}', True, color)
         text_rect = text.get_rect(left=480, top=HEIGHT + 50)
         elements.append((text, text_rect))
 
@@ -198,16 +214,15 @@ class Flappy:
 
                 # Process birds
                 for bird in self.birds:
-                    if not bird.alive: continue
+                    if not bird.alive: continue 
                     bird._update(dt, self.stats['lifespan'])
                     bird._check_out_of_bounds()
                     bird._check_collide_obstacle(self.obstacles)
                     bird._check_collide_goal(self.goal)
-                    bird.calculate_fitness(self.goal_position)
+                    bird.calculate_fitness(self.goal_position, self.stats['lifespan'])
 
-                fitness_list = [bird.fitness for bird in self.birds]
-                self.stats['best_fitness'] = max(fitness_list)
-                self.stats['mean_fitness'] = sum(fitness_list) / len(fitness_list)
+                self.stats['best_fitness'] = max(self.birds, key=lambda bird: bird.fitness).fitness
+                self.stats['mean_fitness'] = sum([bird.fitness for bird in self.birds]) / len(self.birds)
 
                 self._update_display()
                 self.clock.tick(target_fps)
@@ -215,6 +230,7 @@ class Flappy:
                 self.stats['lifespan'] += 1
 
             # Simulation done - hand-off to Darwin
+            time.sleep(1)
             self.birds = self.ai(self.birds)
             self.birds = self.birds[:MAX_POPULATION]
 
