@@ -23,7 +23,6 @@ class Bird():
         self.angle = START_ANGLE
         self.position = START_POS
         
-
     def _update(self, dt, i):
         """Helper function to update bird position and rotation"""
         self.velocity[0] += self.genes[i][0]
@@ -46,15 +45,28 @@ class Bird():
                 self.position[1] + yp
             ))
 
-
     def _calculate_new_angle(self, new_position):
+        """Calculates the directional angle of the bird based on current velocity vector""" 
         d_x = new_position[0] - self.position[0]
         d_y = new_position[1] - self.position[1]
         return get_angle_between_points(d_x, d_y)
 
+    def _check_collide_rect(self, rect):
+        """Helper function to check if a bird point is colliding with a rect"""
+        for point in self.real_points:
+            if rect.collidepoint(point):
+                return True
+        return False
 
-    def _check_out_of_bounds(self):
-        """Helper function to check if bird tries to leave the game"""
+
+    def check_out_of_bounds(self):
+        """This function checks if the bird has wandered off the game board
+        
+        If the bird is out-of-bounds, self.alive is set to False
+        
+        Returns:
+            boolean: True if the bird is out-of-bounds, else False
+        """
         if self.position[0] < 0:
             self.alive = False
         elif self.position[0] > WIDTH:
@@ -65,35 +77,51 @@ class Bird():
             self.alive = False
         else:
             # It survives for now!
-            pass
+            return False
+        return True
 
-    def _check_collide_obstacle(self, obstacles):
-        """Helper function to check if bird collides with an obstacle"""
+
+    def check_collide_obstacle(self, obstacles):
+        """This function checks if the bird has collided with an obstacle
+
+        If the bird has collided, self.alive is set to False
+
+        Args:
+            obstacles (list): List of obstacle Rect objects
+
+        Returns:
+            boolean: True if the bird has collided, else False
+        """
         for obstacle in obstacles:
             if self._check_collide_rect(obstacle.rect):
                 self.alive = False
-                break
-
-
-    def _check_collide_goal(self, goal):
-        """Helper function to check if bird reached goal"""
-        if self._check_collide_rect(goal):
-            self.alive = False
-            self.winner = True
-            return True
-        return False            
-
-
-    def _check_collide_rect(self, rect):
-        """Helper function to check if a bird point is colliding with a rect"""
-        for point in self.real_points:
-            if rect.collidepoint(point):
                 return True
         return False
 
 
+    def check_collide_goal(self, goal):
+        """ This function checks if the bird has reached the goal!
+
+        If the bird has reached the goal:
+            self.alive is set to False
+            self.winner is set to True
+
+        Args:
+            goal (obj): goal Rect object
+
+        Returns:
+            boolean: True if the bird has reached the goal, else False
+
+        """
+        if self._check_collide_rect(goal):
+            self.alive = False
+            self.winner = True
+            return True
+        return False
+
+
     def calculate_fitness(self, goal_pos, score):
-        """Calculates fitness based on distance to goal and time alive"""
+        """Improved fitness function"""
         euclidian = calculate_euclidian_distance(self.position, goal_pos)
 
         # Preffer birds getting closer:

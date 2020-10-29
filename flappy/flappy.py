@@ -39,6 +39,7 @@ class Flappy:
         self.birds = []
 
         self.stats = {}
+        self.counter = 0
 
         self.ai = None
 
@@ -106,12 +107,12 @@ class Flappy:
         elements.append((text, text_rect))
 
         # Lifespan
-        text = self.stats_font.render(f'Lifespan: {self.stats["lifespan"]}', True, color)
+        text = self.stats_font.render(f'Lifespan: {self.counter}', True, color)
         text_rect = text.get_rect(left=20, top=HEIGHT + 50)
         elements.append((text, text_rect))
 
         text = self.stats_font.render(f'/ {MAX_LIFE}', True, color)
-        text_rect = text.get_rect(left=130 if self.stats['lifespan'] < 100 else 137,
+        text_rect = text.get_rect(left=130 if self.counter < 100 else 137,
                                   top=HEIGHT + 50)
         elements.append((text, text_rect))
 
@@ -206,8 +207,8 @@ class Flappy:
         while True:
 
             # Simulate population
-            self.stats['lifespan'] = 0
-            while self.stats['lifespan'] < MAX_LIFE:
+            self.counter = 0
+            while self.counter < MAX_LIFE:
                 # Process user input
                 for event in pygame.event.get():
                     self._check_quit_event(event)
@@ -215,11 +216,11 @@ class Flappy:
                 # Process birds
                 for bird in self.birds:
                     if not bird.alive: continue 
-                    bird._update(dt, self.stats['lifespan'])
-                    bird._check_out_of_bounds()
-                    bird._check_collide_obstacle(self.obstacles)
-                    bird._check_collide_goal(self.goal)
-                    bird.calculate_fitness(self.goal_position, self.stats['lifespan'])
+                    bird._update(dt, self.counter)
+                    bird.check_out_of_bounds()
+                    bird.check_collide_obstacle(self.obstacles)
+                    bird.check_collide_goal(self.goal)
+                    bird.calculate_fitness(self.goal_position, self.counter)
 
                 self.stats['best_fitness'] = max(self.birds, key=lambda bird: bird.fitness).fitness
                 self.stats['mean_fitness'] = sum([bird.fitness for bird in self.birds]) / len(self.birds)
@@ -227,12 +228,12 @@ class Flappy:
                 self._update_display()
                 self.clock.tick(target_fps)
 
-                self.stats['lifespan'] += 1
+                self.counter += 1
 
             # Simulation done - hand-off to Darwin
-            time.sleep(1)
+            time.sleep(1) # Sleep 1 second just so we get a chance to read some stats at the end
             self.birds = self.ai(self.birds)
-            self.birds = self.birds[:MAX_POPULATION]
+            self.birds = self.birds[:MAX_POPULATION] # Restrict population to MAX_POPULATION
 
             # Check for correct type
             if not isinstance(self.birds, list):
@@ -244,7 +245,7 @@ class Flappy:
                 print('Algorithm returned an empty population!')
                 self._game_over('Error!')
 
-            # Reset all birds' first position so they start with the correct angle
+            # Reset all birds' first position so they start with correct states
             for bird in self.birds:
                 bird._reset()
 
