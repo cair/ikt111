@@ -10,18 +10,24 @@ class Bird():
         self.velocity = [0, 0]
         self.angle = START_ANGLE
         self.position = START_POS
+        self.previous_position = START_POS
         self.genes = [generate_random_force() for _ in range(MAX_LIFE)]
         self._reset()
+
+        self.focus = 0
 
         self.rel_points = calculate_rel_points()
 
     def _reset(self):
         """Helper function to reset the birds' position back to start"""
         self.fitness = 0
+        self.focus = 0
         self.alive = True
+        self.winner = False
         self.velocity = [0, 0]
         self.angle = START_ANGLE
         self.position = START_POS
+        self.previous_position = START_POS
         
     def _update(self, dt, i):
         """Helper function to update bird position and rotation"""
@@ -33,6 +39,7 @@ class Bird():
 
         self.angle = self._calculate_new_angle(new_position)
         
+        self.previous_position = self.position
         self.position = new_position
 
         self.real_points = []
@@ -122,20 +129,27 @@ class Bird():
 
     def calculate_fitness(self, goal_pos, score):
         """Improved fitness function"""
-        euclidian = calculate_euclidian_distance(self.position, goal_pos)
+        euclidian_prev = calculate_euclidian_distance(self.previous_position, goal_pos)
+        euclidian_current = calculate_euclidian_distance(self.position, goal_pos)
+
 
         # Preffer birds getting closer:
-        fitness = (MAX_DIST - euclidian) ** 1.05
+        fitness = (MAX_DIST - euclidian_current) ** 1.05
          
-        # Reward fast birds:
-        fitness += (MAX_LIFE - score)
+        # Update and add focus
+        if euclidian_current < euclidian_prev:
+            self.focus += 1
+        else:
+            self.focus -= 4
+
+        self.fitness += self.focus
 
         if self.winner:
-            # If bird won, give extra score
-            fitness *= 1.1
+            # Reward fast birds:
+            fitness += (MAX_LIFE - score) ** 1.08
         
-        # If bird collided, remove all score
         elif not self.alive:
+            # If bird collided, punish!
             fitness = 0
         
         self.fitness = fitness
