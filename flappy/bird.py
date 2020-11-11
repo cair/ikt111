@@ -19,6 +19,7 @@ class Bird():
         """Helper function to reset the birds' position back to start"""
         self.fitness = 0
         self.alive = True
+        self.winner = False
         self.velocity = [0, 0]
         self.angle = START_ANGLE
         self.position = START_POS
