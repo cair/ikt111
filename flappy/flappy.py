@@ -8,12 +8,27 @@ from bird import Bird
 pygame.init()
 
 
-class Obstacle():
-    def __init__(self, pos_x, pos_y):
-        self.width = 160
-        self.height = 250
-        self.rect = pygame.Rect(pos_x, pos_y, self.width, self.height)
+class Obstacle:
+    def __init__(self, pos_1, pos_2):
+        self.rect = pygame.Rect((0, 0), (0, 0))
+        self.update_rect(pos_1, pos_2)
         self.color = colors['black']
+
+    def update_rect(self, pos_1, pos_2):
+        """Helper function to update the rect of an obstacle"""
+        # Updates the dimensions
+        self.rect.w = abs(pos_2[0] - pos_1[0])
+        self.rect.h = abs(pos_2[1] - pos_1[1])
+
+        # Updates the position
+        if pos_1[0] < pos_2[0]:
+            self.rect.left = pos_1[0]
+        else:
+            self.rect.left = pos_2[0]
+        if pos_1[1] < pos_2[1]:
+            self.rect.top = pos_1[1]
+        else:
+            self.rect.top = pos_2[1]
 
 
 class Flappy:
@@ -28,10 +43,11 @@ class Flappy:
         self.clock = pygame.time.Clock()
 
         self.obstacles = [
-            Obstacle(0, 0),
-            Obstacle(160 * 2, 350),
-            Obstacle(160 * 4, 0)
+            Obstacle((0, 0), (160, 250)),
+            Obstacle((160 * 2, 350), (480, 600)),
+            Obstacle((160 * 4, 0), (800, 250))
         ]
+        self.obstacle_preview = None
 
         size = 50
         self.goal = pygame.Rect(WIDTH - size, HEIGHT - size, size, size)
@@ -57,6 +73,13 @@ class Flappy:
             pygame.draw.rect(self.display,
                              (obstacle.color),
                              obstacle.rect)
+
+        # Draws the preview of an user-created obstacle, if there is one
+        if self.obstacle_preview is not None:
+            self.obstacle_preview.update_rect(self.start_pos,
+                                              pygame.mouse.get_pos())
+            pygame.draw.rect(self.display, self.obstacle_preview.color,
+                             self.obstacle_preview.rect)
         
         # Draw goal
         pygame.draw.rect(self.display,
@@ -184,6 +207,26 @@ class Flappy:
             if event.key == pygame.K_q:
                 self._game_over(msg='Quitting...')
 
+    def _check_mouse_event(self, e):
+        """Helper function for creating and removing obstacles"""
+        if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+            # Prepares obstacle creation and gives a preview of the obstacle
+            self.start_pos = e.pos
+            self.new_obstacle = True
+            self.obstacle_preview = Obstacle(self.start_pos, pygame.mouse.get_pos())
+        elif e.type == pygame.MOUSEBUTTONUP:
+            # Creates new obstacle
+            if e.button == 1 and self.new_obstacle:
+                stop_pos = e.pos
+                self.obstacles.append(Obstacle(self.start_pos, stop_pos))
+                self.new_obstacle = False
+
+            # Removes obstacle
+            elif e.button == 3:
+                self.obstacles = [o for o in self.obstacles
+                                  if not o.rect.collidepoint(e.pos)]
+            self.obstacle_preview = None
+
     
     def _generate_initial_population(self):
         """Helper function to generate the initial population of birds"""
@@ -212,6 +255,7 @@ class Flappy:
                 # Process user input
                 for event in pygame.event.get():
                     self._check_quit_event(event)
+                    self._check_mouse_event(event)
 
                 # Process birds
                 for bird in self.birds:
