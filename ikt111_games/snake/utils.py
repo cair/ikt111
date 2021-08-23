@@ -1,6 +1,4 @@
-import numpy as np
 import random
-import config
 
 
 def pos_to_int(pos, sprite_size):

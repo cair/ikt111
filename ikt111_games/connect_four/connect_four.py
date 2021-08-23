@@ -1,12 +1,10 @@
 from copy import deepcopy
 import os
-import numpy as np
 import time
-import random
 import pygame
 pygame.init()
 
-import config
+from . import config
 
 CLOCK_SPEED = 10
 WIDTH  = 589

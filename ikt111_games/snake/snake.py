@@ -1,11 +1,12 @@
 import random
-import sys
 import time
 import pygame
 import numpy as np
+from pathlib import Path
+from . import utils
+from . import config
 
-import utils
-import config
+gfx_path = Path(__file__, "..", "gfx").resolve()
 
 pygame.init()
 
@@ -52,11 +53,11 @@ class SnakeGame:
             self._game_over(msg=f'Invalid game size {self.width}x{self.height}')
 
         self.sprites = {
-            'apple': pygame.image.load('gfx/apple.png').convert_alpha(),
-            'bend': pygame.image.load('gfx/bend.png').convert_alpha(),
-            'head': pygame.image.load('gfx/head.png').convert_alpha(),
-            'straight': pygame.image.load('gfx/straight.png').convert_alpha(),
-            'tail': pygame.image.load('gfx/tail.png').convert_alpha()
+            'apple': pygame.image.load(f'{gfx_path}/apple.png').convert_alpha(),
+            'bend': pygame.image.load(f'{gfx_path}/bend.png').convert_alpha(),
+            'head': pygame.image.load(f'{gfx_path}/head.png').convert_alpha(),
+            'straight': pygame.image.load(f'{gfx_path}/straight.png').convert_alpha(),
+            'tail': pygame.image.load(f'{gfx_path}/tail.png').convert_alpha()
         }
 
         self._update_game_state()

@@ -1,10 +1,8 @@
-import math
 import time
-import random
 import pygame
-from config import *
-from utils import colors
-from bird import Bird
+from .config import *
+from .utils import colors
+from .bird import Bird
 pygame.init()
 
 

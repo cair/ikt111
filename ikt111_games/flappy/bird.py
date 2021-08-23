@@ -1,6 +1,6 @@
 from math import radians, sin, cos
-from config import *
-from utils import *
+from .config import *
+from .utils import *
 
 class Bird():
     def __init__(self):
