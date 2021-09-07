@@ -1,12 +1,9 @@
-from ikt111_games import ConnectFour
+import random
+from ikt111_games import Snake
+snake = Snake()
 
-game = ConnectFour()
-
-@game.register_ai
+@snake.register_ai
 def super_ai():
-    import random
-    import time
-    time.sleep(0.5)
-    return random.randint(0, 6)
+    return [random.choice(['up', 'down', 'left', 'right'])]
 
-game.start(use_ai=True)
+snake.start(use_ai=True)
