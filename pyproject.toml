@@ -3,6 +3,21 @@ name = "ikt111"
 version = "0.1.0"
 description = "Software for IKT111"
 authors = ["Jahn Thomas Fidje <jtfidje@gmail.com>"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Operating System :: Windows",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+packages = [
+    { include = "ikt111_games" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
