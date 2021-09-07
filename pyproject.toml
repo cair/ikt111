@@ -21,7 +21,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.6"
-pygame = "2.0.0"
+pygame = "2.0.0.dev14"
 numpy = "1.19.1"
 
 [tool.poetry.dev-dependencies]
