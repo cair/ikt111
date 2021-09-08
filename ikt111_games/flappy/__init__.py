@@ -1,1 +1,1 @@
-from .bird import Bird
+from .bird import Bird  # noqa: F401

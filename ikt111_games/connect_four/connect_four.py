@@ -1,11 +1,10 @@
-from copy import deepcopy
 import os
-import time
 import pygame
+import time
+from copy import deepcopy
+import ikt111_games.connect_four.config as config
 
 pygame.init()
-
-from . import config
 
 CLOCK_SPEED = 10
 WIDTH = 589
@@ -255,17 +254,18 @@ class ConnectFour:
                 child = Node(col, parent=parent_node)
                 child_state = self.simulate_moves(child.move_list())
                 for window in self._generate_windows(state=child_state):
-                    ## Check if child wins - break if
+                    # Check if child wins - break if
                     winner = self._check_winning_window(window)
                     if winner and winner == self.player1:
                         parent_node.score = -1
                         return None
                     elif winner and winner == self.player2:
                         raise Exception(
-                            "Player won on game move - should not happen. Please report bug"
+                            "Player won on game move - should not happen. "
+                            "Please report bug"
                         )
 
-                    ## Calculate child score
+                    # Calculate child score
                     child.score = max(
                         child.score, score_table[self.player1].get(tuple(window), 0)
                     )
@@ -295,7 +295,8 @@ class ConnectFour:
                         return node.root_move()
                     elif winner and winner == self.player1:
                         raise Exception(
-                            "Player won on game move - should not happen. Please report bug"
+                            "Player won on game move - should not happen. "
+                            "Please report bug"
                         )
 
                     node.score = max(
@@ -324,7 +325,7 @@ class ConnectFour:
         return None
 
     def _generate_horizontal_windows(self, state=None):
-        """Helper function that will yield all possible horizontal windows in a given state"""
+        """Helper function that yield all possible horizontal windows in a state"""
         if not state:
             state = self.game_state
         for row in range(ROWS):
@@ -335,16 +336,16 @@ class ConnectFour:
                 yield window
 
     def _generate_vertical_windows(self, state=None):
-        """Helper function that will yield all possible vertical windows in a given state"""
+        """Helper function that yield all possible vertical windows in a state"""
         if not state:
             state = self.game_state
         for col in range(COLS):
             for i in range(ROWS - 3):
-                window = state[col][i : i + 4]
+                window = state[col][i : i + 4]  # noqa: E203
                 yield window
 
     def _generate_diagonal_windows(self, state=None):
-        """Helper function that will yield all possible diagonal windows in a given state"""
+        """Helper function that yield all possible diagonal windows in a state"""
         if not state:
             state = self.game_state
         for col in range(COLS):

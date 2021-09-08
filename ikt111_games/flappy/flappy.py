@@ -1,6 +1,6 @@
 import time
 import pygame
-from .config import *
+import ikt111_games.flappy.config as config
 from .utils import colors
 from .bird import Bird
 
@@ -31,11 +31,15 @@ class Obstacle:
 
 
 class Flappy:
-    def __init__(self, max_life: int = MAX_LIFE, max_population: int = MAX_POPULATION):
+    def __init__(
+        self,
+        max_life: int = config.MAX_LIFE,
+        max_population: int = config.MAX_POPULATION,
+    ):
         self.messages_font = pygame.font.SysFont(None, 80)
         self.stats_font = pygame.font.SysFont(None, 26)
-        self.width = WIDTH
-        self.height = HEIGHT + STATS_HEIGHT
+        self.width = config.WIDTH
+        self.height = config.HEIGHT + config.STATS_HEIGHT
         self.display = pygame.display.set_mode((self.width, self.height))
 
         self.max_population = max_population
@@ -52,7 +56,7 @@ class Flappy:
         self.obstacle_preview = None
 
         size = 50
-        self.goal = pygame.Rect(WIDTH - size, HEIGHT - size, size, size)
+        self.goal = pygame.Rect(config.WIDTH - size, config.HEIGHT - size, size, size)
         self.goal_position = self.goal.center
         self.birds = []
 
@@ -67,7 +71,9 @@ class Flappy:
         self.display.fill(colors["white"])
 
         # ... Then fill stats-area black and draw them
-        self.display.fill(colors["black"], (0, HEIGHT, WIDTH, STATS_HEIGHT))
+        self.display.fill(
+            colors["black"], (0, config.HEIGHT, config.WIDTH, config.STATS_HEIGHT)
+        )
         self._display_stats()
 
         # Draw obstacles
@@ -120,17 +126,17 @@ class Flappy:
         text = self.stats_font.render(
             f'Generation: {self.stats["generation"]}', True, color
         )
-        text_rect = text.get_rect(left=20, top=HEIGHT + 20)
+        text_rect = text.get_rect(left=20, top=config.HEIGHT + 20)
         elements.append((text, text_rect))
 
         # Lifespan
         text = self.stats_font.render(f"Lifespan: {self.counter}", True, color)
-        text_rect = text.get_rect(left=20, top=HEIGHT + 50)
+        text_rect = text.get_rect(left=20, top=config.HEIGHT + 50)
         elements.append((text, text_rect))
 
         text = self.stats_font.render(f"/ {self.max_life}", True, color)
         text_rect = text.get_rect(
-            left=130 if self.counter < 100 else 137, top=HEIGHT + 50
+            left=130 if self.counter < 100 else 137, top=config.HEIGHT + 50
         )
         elements.append((text, text_rect))
 
@@ -146,36 +152,38 @@ class Flappy:
         text = self.stats_font.render(
             f"Birds alive: {len(self.birds) - (num_dead + num_winners)}", True, color
         )
-        text_rect = text.get_rect(left=250, top=HEIGHT + 20)
+        text_rect = text.get_rect(left=250, top=config.HEIGHT + 20)
         elements.append((text, text_rect))
 
         # Birds dead
         text = self.stats_font.render(f"Birds dead: {num_dead}", True, color)
-        text_rect = text.get_rect(left=250, top=HEIGHT + 50)
+        text_rect = text.get_rect(left=250, top=config.HEIGHT + 50)
         elements.append((text, text_rect))
 
         # Winners
         text = self.stats_font.render(f"Winners: {num_winners}", True, color)
-        text_rect = text.get_rect(left=250, top=HEIGHT + 80)
+        text_rect = text.get_rect(left=250, top=config.HEIGHT + 80)
         elements.append((text, text_rect))
 
         # Best fitness
         text = self.stats_font.render(
             f'Best fitness: {self.stats["best_fitness"]:.0f}', True, color
         )
-        text_rect = text.get_rect(left=480, top=HEIGHT + 20)
+        text_rect = text.get_rect(left=480, top=config.HEIGHT + 20)
         elements.append((text, text_rect))
 
         # Avg. fitness
         text = self.stats_font.render(
             f'Average fitness: {self.stats["mean_fitness"]:.0f}', True, color
         )
-        text_rect = text.get_rect(left=480, top=HEIGHT + 50)
+        text_rect = text.get_rect(left=480, top=config.HEIGHT + 50)
         elements.append((text, text_rect))
 
         # FPS
         text = self.stats_font.render(f"FPS: {self.clock.get_fps():.0f}", True, color)
-        text_rect = text.get_rect(left=WIDTH - 80, top=HEIGHT + STATS_HEIGHT - 30)
+        text_rect = text.get_rect(
+            left=config.WIDTH - 80, top=config.HEIGHT + config.STATS_HEIGHT - 30
+        )
         elements.append((text, text_rect))
 
         for element in elements:

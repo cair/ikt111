@@ -1,4 +1,4 @@
-from ikt111_games.flappy.bird import Bird
+from ikt111_games.flappy import Bird
 from ikt111_games import Flappy
 import random
 

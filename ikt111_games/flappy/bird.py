@@ -1,16 +1,21 @@
+import ikt111_games.flappy.config as config
+from ikt111_games.flappy.utils import (
+    generate_random_force,
+    calculate_rel_points,
+    calculate_euclidian_distance,
+    get_angle_between_points,
+)
 from math import radians, sin, cos
-from .config import *
-from .utils import *
 
 
 class Bird:
-    def __init__(self, max_life: int = MAX_LIFE):
+    def __init__(self, max_life: int = config.MAX_LIFE):
         self.fitness = 0
         self.alive = True
         self.winner = False
         self.velocity = [0, 0]
-        self.angle = START_ANGLE
-        self.position = START_POS
+        self.angle = config.START_ANGLE
+        self.position = config.START_POS
         self.genes = [generate_random_force() for _ in range(max_life)]
         self._reset()
 
@@ -22,8 +27,8 @@ class Bird:
         self.alive = True
         self.winner = False
         self.velocity = [0, 0]
-        self.angle = START_ANGLE
-        self.position = START_POS
+        self.angle = config.START_ANGLE
+        self.position = config.START_POS
 
     def _update(self, dt, i):
         """Helper function to update bird position and rotation"""
@@ -47,7 +52,7 @@ class Bird:
             self.real_points.append((self.position[0] + xp, self.position[1] + yp))
 
     def _calculate_new_angle(self, new_position):
-        """Calculates the directional angle of the bird based on current velocity vector"""
+        """Calculate the directional angle of a bird based on current velocity vector"""
         d_x = new_position[0] - self.position[0]
         d_y = new_position[1] - self.position[1]
         return get_angle_between_points(d_x, d_y)
@@ -69,11 +74,11 @@ class Bird:
         """
         if self.position[0] < 0:
             self.alive = False
-        elif self.position[0] > WIDTH:
+        elif self.position[0] > config.WIDTH:
             self.alive = False
         elif self.position[1] < 0:
             self.alive = False
-        elif self.position[1] > HEIGHT:
+        elif self.position[1] > config.HEIGHT:
             self.alive = False
         else:
             # It survives for now!
@@ -134,6 +139,6 @@ class Bird:
             fitness (float): The fitness score that is given to the bird
         """
         euclidian = calculate_euclidian_distance(self.position, goal_pos)
-        fitness = MAX_DIST - euclidian
+        fitness = config.MAX_DIST - euclidian
         self.fitness = fitness
         return fitness
