@@ -3,14 +3,14 @@ from .config import *
 from .utils import *
 
 class Bird():
-    def __init__(self):
+    def __init__(self, max_life: int=MAX_LIFE):
         self.fitness = 0
         self.alive = True
         self.winner = False
         self.velocity = [0, 0]
         self.angle = START_ANGLE
         self.position = START_POS
-        self.genes = [generate_random_force() for _ in range(MAX_LIFE)]
+        self.genes = [generate_random_force() for _ in range(max_life)]
         self._reset()
 
         self.rel_points = calculate_rel_points()
@@ -23,7 +23,7 @@ class Bird():
         self.velocity = [0, 0]
         self.angle = START_ANGLE
         self.position = START_POS
-        
+
     def _update(self, dt, i):
         """Helper function to update bird position and rotation"""
         self.velocity[0] += self.genes[i][0]
@@ -33,7 +33,7 @@ class Bird():
                         self.position[1] + self.velocity[1] * dt]
 
         self.angle = self._calculate_new_angle(new_position)
-        
+
         self.position = new_position
 
         self.real_points = []
@@ -47,7 +47,7 @@ class Bird():
             ))
 
     def _calculate_new_angle(self, new_position):
-        """Calculates the directional angle of the bird based on current velocity vector""" 
+        """Calculates the directional angle of the bird based on current velocity vector"""
         d_x = new_position[0] - self.position[0]
         d_y = new_position[1] - self.position[1]
         return get_angle_between_points(d_x, d_y)
@@ -62,9 +62,9 @@ class Bird():
 
     def check_out_of_bounds(self):
         """This function checks if the bird has wandered off the game board
-        
+
         If the bird is out-of-bounds, self.alive is set to False
-        
+
         Returns:
             boolean: True if the bird is out-of-bounds, else False
         """
@@ -122,8 +122,8 @@ class Bird():
 
 
     def calculate_fitness(self, goal_pos):
-        """Default fitness function 
-        
+        """Default fitness function
+
         Fitness is calculated by subtracting the euclidian distance
         between the bird and the goal from the diagonal distance of the map.
 
@@ -138,6 +138,6 @@ class Bird():
             fitness (float): The fitness score that is given to the bird
         """
         euclidian = calculate_euclidian_distance(self.position, goal_pos)
-        fitness = (MAX_DIST - euclidian) 
+        fitness = (MAX_DIST - euclidian)
         self.fitness = fitness
         return fitness

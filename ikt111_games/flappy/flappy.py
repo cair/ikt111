@@ -30,12 +30,15 @@ class Obstacle:
 
 
 class Flappy:
-    def __init__(self):
+    def __init__(self, max_life: int=MAX_LIFE, max_population: int=MAX_POPULATION):
         self.messages_font = pygame.font.SysFont(None, 80)
         self.stats_font = pygame.font.SysFont(None, 26)
         self.width   = WIDTH
         self.height  = HEIGHT + STATS_HEIGHT
         self.display = pygame.display.set_mode((self.width, self.height))
+
+        self.max_population = max_population
+        self.max_life = max_life
 
         pygame.display.set_caption('Evolutionary Birds')
         self.clock = pygame.time.Clock()
@@ -65,7 +68,7 @@ class Flappy:
         # ... Then fill stats-area black and draw them
         self.display.fill(colors['black'], (0, HEIGHT, WIDTH, STATS_HEIGHT))
         self._display_stats()
-        
+
         # Draw obstacles
         for obstacle in self.obstacles:
             pygame.draw.rect(self.display,
@@ -78,7 +81,7 @@ class Flappy:
                                               pygame.mouse.get_pos())
             pygame.draw.rect(self.display, self.obstacle_preview.color,
                              self.obstacle_preview.rect)
-        
+
         # Draw goal
         pygame.draw.rect(self.display,
                          colors['green'],
@@ -118,7 +121,7 @@ class Flappy:
 
 
     def _display_stats(self):
-        """Helper function to draw stats on the screen"""    
+        """Helper function to draw stats on the screen"""
         color = colors['white']
         elements = []
 
@@ -132,7 +135,7 @@ class Flappy:
         text_rect = text.get_rect(left=20, top=HEIGHT + 50)
         elements.append((text, text_rect))
 
-        text = self.stats_font.render(f'/ {MAX_LIFE}', True, color)
+        text = self.stats_font.render(f'/ {self.max_life}', True, color)
         text_rect = text.get_rect(left=130 if self.counter < 100 else 137,
                                   top=HEIGHT + 50)
         elements.append((text, text_rect))
@@ -159,7 +162,7 @@ class Flappy:
         text = self.stats_font.render(f'Winners: {num_winners}', True, color)
         text_rect = text.get_rect(left=250, top=HEIGHT + 80)
         elements.append((text, text_rect))
-        
+
         # Best fitness
         text = self.stats_font.render(f'Best fitness: {self.stats["best_fitness"]:.0f}', True, color)
         text_rect = text.get_rect(left=480, top=HEIGHT + 20)
@@ -225,11 +228,11 @@ class Flappy:
                                   if not o.rect.collidepoint(e.pos)]
             self.obstacle_preview = None
 
-    
+
     def _generate_initial_population(self):
         """Helper function to generate the initial population of birds"""
-        return [Bird() for _ in range(MAX_POPULATION)]
-            
+        return [Bird() for _ in range(self.max_population)]
+
 
     def register_ai(self, f):
         """Decorator for registering 'external' AI"""
@@ -239,7 +242,7 @@ class Flappy:
     def start(self):
         target_fps = 60
         dt = 1.0/float(target_fps)
-        
+
         # Create initial population
         self.birds = self._generate_initial_population()
 
@@ -249,7 +252,7 @@ class Flappy:
 
             # Simulate population
             self.counter = 0
-            while self.counter < MAX_LIFE:
+            while self.counter < self.max_life:
                 # Process user input
                 for event in pygame.event.get():
                     self._check_quit_event(event)
@@ -275,7 +278,7 @@ class Flappy:
             # Simulation done - hand-off to Darwin
             time.sleep(1) # Sleep 1 second just so we get a chance to read some stats at the end
             self.birds = self.ai(self.birds)
-            self.birds = self.birds[:MAX_POPULATION] # Restrict population to MAX_POPULATION
+            self.birds = self.birds[:self.max_population] # Restrict population
 
             # Check for correct type
             if not isinstance(self.birds, list):
