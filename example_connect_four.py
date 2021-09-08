@@ -1,6 +1,8 @@
 from ikt111_games import ConnectFour
 
-game = ConnectFour()
+difficulty = "easy"  # "easy", "medium", "hard"
+
+game = ConnectFour(difficulty=difficulty)
 
 
 @game.register_ai

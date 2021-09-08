@@ -122,7 +122,7 @@ class TestPiece(BasePiece):
 
 
 class ConnectFour:
-    def __init__(self):
+    def __init__(self, difficulty: str = config.DIFFICULTY):
         self.font_style = pygame.font.SysFont(None, 80)
         self.width = WIDTH
         self.height = HEIGHT
@@ -140,7 +140,7 @@ class ConnectFour:
         self.player2 = 2
         self.game_state = [[self.board_piece for _ in range(ROWS)] for _ in range(COLS)]
 
-        self.max_depth = difficulty.get(config.DIFFICULTY, "easy")
+        self.max_depth = difficulty.get(difficulty, config.DIFFICULTY)
         self.ai = lambda placeholder: self._game_over(msg="No AI registered!")
 
     def register_ai(self, f):
