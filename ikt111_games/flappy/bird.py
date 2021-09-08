@@ -2,8 +2,9 @@ from math import radians, sin, cos
 from .config import *
 from .utils import *
 
-class Bird():
-    def __init__(self, max_life: int=MAX_LIFE):
+
+class Bird:
+    def __init__(self, max_life: int = MAX_LIFE):
         self.fitness = 0
         self.alive = True
         self.winner = False
@@ -29,8 +30,10 @@ class Bird():
         self.velocity[0] += self.genes[i][0]
         self.velocity[1] += self.genes[i][1]
 
-        new_position = [self.position[0] + self.velocity[0] * dt,
-                        self.position[1] + self.velocity[1] * dt]
+        new_position = [
+            self.position[0] + self.velocity[0] * dt,
+            self.position[1] + self.velocity[1] * dt,
+        ]
 
         self.angle = self._calculate_new_angle(new_position)
 
@@ -41,10 +44,7 @@ class Bird():
             angle = radians(self.angle) + point_angle
             xp = point_radius * sin(angle)
             yp = point_radius * cos(angle)
-            self.real_points.append((
-                self.position[0] + xp,
-                self.position[1] + yp
-            ))
+            self.real_points.append((self.position[0] + xp, self.position[1] + yp))
 
     def _calculate_new_angle(self, new_position):
         """Calculates the directional angle of the bird based on current velocity vector"""
@@ -58,7 +58,6 @@ class Bird():
             if rect.collidepoint(point):
                 return True
         return False
-
 
     def check_out_of_bounds(self):
         """This function checks if the bird has wandered off the game board
@@ -81,7 +80,6 @@ class Bird():
             return False
         return True
 
-
     def check_collide_obstacle(self, obstacles):
         """This function checks if the bird has collided with an obstacle
 
@@ -99,9 +97,8 @@ class Bird():
                 return True
         return False
 
-
     def check_collide_goal(self, goal):
-        """ This function checks if the bird has reached the goal!
+        """This function checks if the bird has reached the goal!
 
         If the bird has reached the goal:
             self.alive is set to False
@@ -120,7 +117,6 @@ class Bird():
             return True
         return False
 
-
     def calculate_fitness(self, goal_pos):
         """Default fitness function
 
@@ -138,6 +134,6 @@ class Bird():
             fitness (float): The fitness score that is given to the bird
         """
         euclidian = calculate_euclidian_distance(self.position, goal_pos)
-        fitness = (MAX_DIST - euclidian)
+        fitness = MAX_DIST - euclidian
         self.fitness = fitness
         return fitness

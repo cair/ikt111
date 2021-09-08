@@ -2,39 +2,36 @@ from copy import deepcopy
 import os
 import time
 import pygame
+
 pygame.init()
 
 from . import config
 
 CLOCK_SPEED = 10
-WIDTH  = 589
+WIDTH = 589
 HEIGHT = 540
-PIECE_SIZE = 63 # Hardcoded to fit with background
+PIECE_SIZE = 63  # Hardcoded to fit with background
 ROWS = 6
 COLS = 7
 
-colors = {
-    'black': (0, 0, 0),
-    'white': (255, 255, 255),
-    'blue':  (0, 0, 255)
-}
+colors = {"black": (0, 0, 0), "white": (255, 255, 255), "blue": (0, 0, 255)}
 
-score_table = { 
+score_table = {
     config.PLAYER1: {
-        (config.BOARD, config.BOARD, config.BOARD, config.PLAYER1): 	1/4,
-        (config.BOARD, config.BOARD, config.PLAYER1, config.PLAYER1): 	2/4,
-        (config.BOARD, config.PLAYER1, config.PLAYER1, config.PLAYER1): 3/4,
-    }, 
+        (config.BOARD, config.BOARD, config.BOARD, config.PLAYER1): 1 / 4,
+        (config.BOARD, config.BOARD, config.PLAYER1, config.PLAYER1): 2 / 4,
+        (config.BOARD, config.PLAYER1, config.PLAYER1, config.PLAYER1): 3 / 4,
+    },
     config.PLAYER2: {
-        (config.BOARD, config.BOARD, config.BOARD, config.PLAYER2): 	1/4,
-        (config.BOARD, config.BOARD, config.PLAYER2, config.PLAYER2): 	2/4,
-        (config.BOARD, config.PLAYER2, config.PLAYER2, config.PLAYER2): 3/4,
-    }
+        (config.BOARD, config.BOARD, config.BOARD, config.PLAYER2): 1 / 4,
+        (config.BOARD, config.BOARD, config.PLAYER2, config.PLAYER2): 2 / 4,
+        (config.BOARD, config.PLAYER2, config.PLAYER2, config.PLAYER2): 3 / 4,
+    },
 }
 
-difficulty = {'easy': 3, 'medium': 5, 'hard': 7}
+difficulty = {"easy": 3, "medium": 5, "hard": 7}
 
-gfx_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gfx')
+gfx_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gfx")
 
 
 class Node:
@@ -69,18 +66,22 @@ class Highlighter(pygame.sprite.Sprite):
     base_x = 12.5
     base_y = 55
     d_x = 81.3
-    image = pygame.image.load(os.path.join(gfx_dir, 'highlight.png'))
+    image = pygame.image.load(os.path.join(gfx_dir, "highlight.png"))
+
     def __init__(self, column):
         pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = [self.base_x + (self.d_x * column), self.base_y]
 
+
 class Background(pygame.sprite.Sprite):
-    image = pygame.image.load(os.path.join(gfx_dir, 'background.png'))
+    image = pygame.image.load(os.path.join(gfx_dir, "background.png"))
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = [0, 0]
+
 
 class BasePiece(pygame.sprite.Sprite):
     base_x = 53
@@ -95,7 +96,8 @@ class BasePiece(pygame.sprite.Sprite):
 
 
 class RedPiece(BasePiece):
-    image = pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
+    image = pygame.image.load(os.path.join(gfx_dir, "red_piece.png"))
+
     def __init__(self, col, row):
         pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
@@ -103,27 +105,30 @@ class RedPiece(BasePiece):
 
 
 class YellowPiece(BasePiece):
-    image = pygame.image.load(os.path.join(gfx_dir, 'yellow_piece.png'))
+    image = pygame.image.load(os.path.join(gfx_dir, "yellow_piece.png"))
+
     def __init__(self, col, row):
         pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
         self.rect.center = self.calc_position(col, row)
 
+
 class TestPiece(BasePiece):
-    image =  pygame.image.load(os.path.join(gfx_dir, 'red_piece.png'))
+    image = pygame.image.load(os.path.join(gfx_dir, "red_piece.png"))
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.rect = self.image.get_rect()
         self.rect.center = (53, 94)
 
 
-class ConnectFour():
+class ConnectFour:
     def __init__(self):
         self.font_style = pygame.font.SysFont(None, 80)
-        self.width   = WIDTH
-        self.height  = HEIGHT
+        self.width = WIDTH
+        self.height = HEIGHT
         self.display = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption('Connect Four')
+        pygame.display.set_caption("Connect Four")
         self.clock = pygame.time.Clock()
 
         self.background = Background()
@@ -136,16 +141,14 @@ class ConnectFour():
         self.player2 = 2
         self.game_state = [[self.board_piece for _ in range(ROWS)] for _ in range(COLS)]
 
-        self.max_depth = difficulty.get(config.DIFFICULTY, 'easy')
-        self.ai = lambda placeholder: self._game_over(msg='No AI registered!')
-
+        self.max_depth = difficulty.get(config.DIFFICULTY, "easy")
+        self.ai = lambda placeholder: self._game_over(msg="No AI registered!")
 
     def register_ai(self, f):
         """Decorator for registering 'external' AI"""
         self.ai = f
 
-
-    def _display_message(self, msg, color=colors['black']):
+    def _display_message(self, msg, color=colors["black"]):
         """Helper function to show message on display"""
         message = self.font_style.render(msg, True, color)
         message_rect = message.get_rect(center=(self.width / 2, self.height / 2))
@@ -154,36 +157,30 @@ class ConnectFour():
         pygame.display.update()
         time.sleep(1)
 
-
     def _update_display(self):
         """Helper function to update pygame display"""
-        self.display.fill(colors['white'])
-        self.display.blit(self.background.image, 
-                          self.background.rect)
+        self.display.fill(colors["white"])
+        self.display.blit(self.background.image, self.background.rect)
 
         if self.highlighter:
-            self.display.blit(self.highlighter.image,
-                            self.highlighter.rect)
+            self.display.blit(self.highlighter.image, self.highlighter.rect)
 
         for piece in self.game_pieces:
             self.display.blit(piece.image, piece.rect)
         pygame.display.update()
-
 
     def _exit(self):
         """Helper function to exit the game"""
         pygame.quit()
         quit()
 
-
     def _check_quit_event(self, event):
         """Helper function to check for "user want's to quit" conditions"""
         if event.type == pygame.QUIT:
-            self._game_over(msg='Quitting...')
+            self._game_over(msg="Quitting...")
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
-                self._game_over(msg='Quitting...')
-
+                self._game_over(msg="Quitting...")
 
     def _check_highlighter_event(self, pos):
         """Helper function to draw column highligher when hover over"""
@@ -191,8 +188,7 @@ class ConnectFour():
         if col == -1:
             self.highlighter = None
         else:
-            self.highlighter = Highlighter(col)    
-
+            self.highlighter = Highlighter(col)
 
     def _pos_to_col(self, pos):
         """Helper function to convert a position into its corresponding column"""
@@ -207,30 +203,31 @@ class ConnectFour():
                 return i - 1
         return -1
 
-
     def _get_next_row(self, col, state=None):
         """Helper function to get the next free row in a given column and state"""
         if not state:
             state = self.game_state
-        return next((i - 1 for i, r in enumerate(state[col]) 
-                     if r != self.board_piece), # Condition
-                     ROWS - 1) # Default return value
-
+        return next(
+            (
+                i - 1 for i, r in enumerate(state[col]) if r != self.board_piece
+            ),  # Condition
+            ROWS - 1,
+        )  # Default return value
 
     def _put_piece(self, player, col, row, state=None):
         """Helper function to insert player pieces on the board"""
         if not state:
             state = self.game_state
-        
+
         if player == self.player1:
             piece = RedPiece(col, row)
         elif player == self.player2:
             piece = YellowPiece(col, row)
         else:
-            raise Exception(f'Unknown player \'{player}\'')
+            raise Exception(f"Unknown player '{player}'")
 
         state[col][row] = player
-        
+
         if state is self.game_state:
             self.game_pieces.append(piece)
 
@@ -243,16 +240,15 @@ class ConnectFour():
             if row > -1:
                 yield col
 
-
     def _get_score(self, player, window):
         """Helper function to get the score for a given player and window"""
         if isinstance(window, list):
             window = tuple(window)
         return score_table[player].get(window, 0)
 
-
     def _make_move(self):
         """Game AI"""
+
         def generate_children(parent_node, current_state):
             children = []
             for col in self._valid_cols(state=current_state):
@@ -265,11 +261,15 @@ class ConnectFour():
                         parent_node.score = -1
                         return None
                     elif winner and winner == self.player2:
-                        raise Exception('Player won on game move - should not happen. Please report bug')
-                    
+                        raise Exception(
+                            "Player won on game move - should not happen. Please report bug"
+                        )
+
                     ## Calculate child score
-                    child.score = max(child.score, score_table[self.player1].get(tuple(window), 0))
-            
+                    child.score = max(
+                        child.score, score_table[self.player1].get(tuple(window), 0)
+                    )
+
                 children.append(child)
             return max(children, key=lambda x: x.score)
 
@@ -283,7 +283,7 @@ class ConnectFour():
             node = open_list.pop(0)
             moves = node.move_list()
             new_state = self.simulate_moves(moves)
-            
+
             if node.is_opponent:
                 for col in self._valid_cols(state=new_state):
                     open_list.append(Node(col, parent=node))
@@ -294,21 +294,24 @@ class ConnectFour():
                         # We assume any prev. opponent move is their best
                         return node.root_move()
                     elif winner and winner == self.player1:
-                        raise Exception('Player won on game move - should not happen. Please report bug')
-                    
-                    node.score = max(node.score, score_table[self.player2].get(tuple(window), 0))
-                        
+                        raise Exception(
+                            "Player won on game move - should not happen. Please report bug"
+                        )
+
+                    node.score = max(
+                        node.score, score_table[self.player2].get(tuple(window), 0)
+                    )
+
                 # Create opponent children
                 if node.depth < self.max_depth:
                     child = generate_children(node, new_state)
-                
+
                     if child:
                         open_list.append(child)
                 if node.score > best_node.score:
                     best_node = node
 
         return best_node.root_move()
-
 
     def _check_if_col_is_full(self, col):
         """Helper function to check if a column is full"""
@@ -337,9 +340,9 @@ class ConnectFour():
             state = self.game_state
         for col in range(COLS):
             for i in range(ROWS - 3):
-                window = state[col][i:i + 4]
+                window = state[col][i : i + 4]
                 yield window
-    
+
     def _generate_diagonal_windows(self, state=None):
         """Helper function that will yield all possible diagonal windows in a given state"""
         if not state:
@@ -355,7 +358,6 @@ class ConnectFour():
                 else:
                     continue
 
-
     def _generate_windows(self, state=None):
         """Helper function that wraps the different 'generate windows' functions"""
         if not state:
@@ -366,8 +368,7 @@ class ConnectFour():
             yield window
         for window in self._generate_diagonal_windows(state):
             yield window
-        
-    
+
     def _check_if_board_is_full(self, state=None):
         """Helper function to check if the board is full"""
         if not state:
@@ -387,21 +388,19 @@ class ConnectFour():
                 elif winner == self.player2:
                     self._game_over()
                 else:
-                    raise Exception(f'Unknown winner \'{winner}\'')
+                    raise Exception(f"Unknown winner '{winner}'")
         if self._check_if_board_is_full():
-            self._game_over('Draw!')
+            self._game_over("Draw!")
 
-    def _game_over(self, msg='You Lost'):
+    def _game_over(self, msg="You Lost"):
         """Helper function to display a loss-condition message"""
         self._display_message(msg)
         self._exit()
 
-
-    def _game_won(self, msg='You Won!'):
+    def _game_won(self, msg="You Won!"):
         """Helper function to display a win-condition message"""
         self._display_message(msg)
         self._exit()
-
 
     def simulate_moves(self, moves):
         """Simulates a sequence of moves.
@@ -420,7 +419,6 @@ class ConnectFour():
                 return False
             self._put_piece(player, col, row, new_state)
         return new_state
-    
 
     def get_all_valid_cols(self, state=None):
         """This function will return all valid columns given a state.
@@ -434,7 +432,6 @@ class ConnectFour():
             list: A list of all available columns
         """
         return [col for col in self._valid_cols(state=state)]
-
 
     def is_winner(self, player, state):
         """Checks if a given player wins the game in a given game state
@@ -452,7 +449,6 @@ class ConnectFour():
                 return True
         return False
 
-
     def get_heuristic(self, state):
         """Calculate a heuristic given a state
 
@@ -462,15 +458,22 @@ class ConnectFour():
         Returns:
             float: Heuristic of the given state
         """
-        player_1_max = max([self._get_score(self.player1, window)
-                            for window in self._generate_windows(state=state)])
+        player_1_max = max(
+            [
+                self._get_score(self.player1, window)
+                for window in self._generate_windows(state=state)
+            ]
+        )
 
-        player_2_max = max([self._get_score(self.player2, window)
-                            for window in self._generate_windows(state=state)])
+        player_2_max = max(
+            [
+                self._get_score(self.player2, window)
+                for window in self._generate_windows(state=state)
+            ]
+        )
 
         h = player_1_max - player_2_max
         return h
-
 
     def start(self, use_ai=False):
         self._update_display()
@@ -496,16 +499,16 @@ class ConnectFour():
                     # Get next move from their AI
                     move = self.ai()
                     if move < 0 or move > COLS:
-                        print(f'Invalid move: {move}')
+                        print(f"Invalid move: {move}")
                         move = None
 
             row = self._get_next_row(move)
             if row > -1:
                 self._put_piece(self.player1, move, row)
-        
+
             self._update_display()
             self._check_if_winner()
-            
+
             # Game AI moves after player
             move = self._make_move()
             row = self._get_next_row(move)
@@ -517,4 +520,3 @@ class ConnectFour():
 
             # None of the above! Let's continue!
             self.clock.tick(CLOCK_SPEED)
-    

@@ -13,14 +13,14 @@ START_POS = [100, HEIGHT - 100]
 START_ANGLE = 135
 START_VELOCITY = [0, 0]
 
-MAX_DIST = sqrt((WIDTH ** 2) + (HEIGHT ** 2)) # Used to calc. default fitness
+MAX_DIST = sqrt((WIDTH ** 2) + (HEIGHT ** 2))  # Used to calc. default fitness
 
 
-#----------------#
+# ----------------#
 # CAN BE CHANGED #
 # ---------------#
 
-# This determines both the bird lifespan 
+# This determines both the bird lifespan
 # and how many genes they have
 MAX_LIFE = 1000
 

@@ -19,15 +19,16 @@ def generate_random_force(_min=-4, _max=4):
 
     Returns:
         list: Force vector
-    """ 
-    return [random.randint(_min, _max),
-            random.randint(_min, _max)]
+    """
+    return [random.randint(_min, _max), random.randint(_min, _max)]
+
 
 game = Flappy(max_life=MAX_LIFE, max_population=MAX_POPULATION)
 
+
 @game.register_ai
 def super_ai(birds):
-    """ A super AI function!
+    """A super AI function!
 
     There is a 33% chance that:
         1. A bird is replaced by a new, randomly generated one!
@@ -56,5 +57,6 @@ def super_ai(birds):
             pass
 
     return birds
+
 
 game.start()

@@ -3,13 +3,14 @@ import random
 from functools import lru_cache
 
 colors = {
-    'red': (255, 0, 0),
-    'green': (0, 255, 0),
-    'blue': (0, 0, 255),
-    'black': (0, 0, 0),
-    'gray': (100, 100, 100),
-    'white': (255, 255, 255),
+    "red": (255, 0, 0),
+    "green": (0, 255, 0),
+    "blue": (0, 0, 255),
+    "black": (0, 0, 0),
+    "gray": (100, 100, 100),
+    "white": (255, 255, 255),
 }
+
 
 def generate_random_force(_min=-4, _max=4):
     """Generate a random force vector with x and y in the interval [_min, _max]
@@ -20,9 +21,8 @@ def generate_random_force(_min=-4, _max=4):
 
     Returns:
         list: Force vector
-    """ 
-    return [random.randint(_min, _max),
-            random.randint(_min, _max)]
+    """
+    return [random.randint(_min, _max), random.randint(_min, _max)]
 
 
 def calculate_euclidian_distance(p, q):
@@ -41,6 +41,7 @@ def calculate_euclidian_distance(p, q):
 def get_angle_between_points(d_x, d_y):
     """Helper function to calculate an angle between two points"""
     return math.atan2(d_x, d_y) * 180 / math.pi
+
 
 @lru_cache(maxsize=10)
 def calculate_rel_points(scale=0.5):
