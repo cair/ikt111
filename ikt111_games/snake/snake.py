@@ -68,8 +68,8 @@ class SnakeGame:
         pygame.display.update()
         time.sleep(1)
 
-    def _load_image(self, sprite_name, color_key=None):
-        """Helper function to load image from disk"""
+    def _get_sprite(self, sprite_name, color_key=None):
+        """Helper function to get sprite from the sprite dict"""
         image = self.sprites[sprite_name]
         image = pygame.transform.scale(image, (self.sprite_size, self.sprite_size))
         if color_key:
@@ -82,21 +82,21 @@ class SnakeGame:
         snake_head = self.snake[-1]
         if snake_head[1] < self.snake[-2][1]:
             # Moving Up
-            image = self._load_image("head")
+            image = self._get_sprite("head")
 
         elif snake_head[0] > self.snake[-2][0]:
             # Moving right
-            image = self._load_image("head")
+            image = self._get_sprite("head")
             image = pygame.transform.rotate(image, 270)
 
         elif snake_head[1] > self.snake[-2][1]:
             # Moving down
-            image = self._load_image("head")
+            image = self._get_sprite("head")
             image = pygame.transform.rotate(image, 180)
 
         elif snake_head[0] < self.snake[-2][0]:
             # Moving left
-            image = self._load_image("head")
+            image = self._get_sprite("head")
             image = pygame.transform.rotate(image, 90)
 
         self.display.blit(image, snake_head)
@@ -105,21 +105,21 @@ class SnakeGame:
         snake_tail = self.snake[0]
         if snake_tail[1] > self.snake[1][1]:
             # Moving Up
-            image = self._load_image("tail")
+            image = self._get_sprite("tail")
 
         elif snake_tail[0] < self.snake[1][0]:
             # Moving right
-            image = self._load_image("tail")
+            image = self._get_sprite("tail")
             image = pygame.transform.rotate(image, 270)
 
         elif snake_tail[1] < self.snake[1][1]:
             # Moving down
-            image = self._load_image("tail")
+            image = self._get_sprite("tail")
             image = pygame.transform.rotate(image, 180)
 
         elif snake_tail[0] > self.snake[1][0]:
             # Moving left
-            image = self._load_image("tail")
+            image = self._get_sprite("tail")
             image = pygame.transform.rotate(image, 90)
 
         self.display.blit(image, snake_tail)
@@ -131,38 +131,38 @@ class SnakeGame:
 
             if n_seg[0] < seg[0] < p_seg[0] or p_seg[0] < seg[0] < n_seg[0]:
                 # Horizontal segment
-                image = self._load_image("straight")
+                image = self._get_sprite("straight")
 
             elif n_seg[1] < seg[1] < p_seg[1] or p_seg[1] < seg[1] < n_seg[1]:
                 # Vertical segment
-                image = self._load_image("straight")
+                image = self._get_sprite("straight")
                 image = pygame.transform.rotate(image, 90)
 
             elif (n_seg[0] > seg[0] and p_seg[1] < seg[1]) or (
                 p_seg[0] > seg[0] and n_seg[1] < seg[1]
             ):
                 # Angle Left-Up
-                image = self._load_image("bend")
+                image = self._get_sprite("bend")
 
             elif (n_seg[1] < seg[1] and p_seg[0] < seg[0]) or (
                 p_seg[1] < seg[1] and n_seg[0] < seg[0]
             ):
                 # Angle Top-Left
-                image = self._load_image("bend")
+                image = self._get_sprite("bend")
                 image = pygame.transform.rotate(image, 90)
 
             elif (n_seg[0] < seg[0] and p_seg[1] > seg[1]) or (
                 p_seg[0] < seg[0] and n_seg[1] > seg[1]
             ):
                 # Angle Left-Down
-                image = self._load_image("bend")
+                image = self._get_sprite("bend")
                 image = pygame.transform.rotate(image, 180)
 
             elif (n_seg[1] > seg[1] and p_seg[0] > seg[0]) or (
                 p_seg[1] > seg[1] and n_seg[0] > seg[0]
             ):
                 # Angle Down-Right
-                image = self._load_image("bend")
+                image = self._get_sprite("bend")
                 image = pygame.transform.rotate(image, 270)
 
             else:
@@ -178,7 +178,7 @@ class SnakeGame:
 
     def _draw_apple(self):
         """Helper function to draw apple on display"""
-        image = self._load_image("apple")
+        image = self._get_sprite("apple")
         self.display.blit(image, self.apple)
 
     def _update_display(self):
@@ -303,12 +303,12 @@ class SnakeGame:
         return np.array([p for p in zip(*np.where(self.game_state == 0))])
 
     def _game_over(self, msg="You Lost"):
-        """Helper function to display a loss-condition message"""
+        """Helper function to display a loss-condition message and exit the game"""
         self._display_message(msg)
         self._exit()
 
     def _game_won(self, msg="You Won!"):
-        """Helper function to display a win-condition message"""
+        """Helper function to display a win-condition message and exit the game"""
         self._display_message(msg)
         self._exit()
 
@@ -346,11 +346,13 @@ class SnakeGame:
             ]
 
     def is_legal(self, moves):
-        """Function to check if a sequence of moves is legal / will not end
+        """Function to check if a move or a sequence of moves is legal / will not end
         in a loss-condition
 
         This function will simulate moving the snake according to the
-        provided sequence of moves.
+        provided move or sequence of moves.
+
+        If a singular move is given as a string, it is put into a tuple
 
         Returns:
             bool: True if all the moves are legal
@@ -359,7 +361,7 @@ class SnakeGame:
         temp_snake = self.snake.copy()
 
         if isinstance(moves, str):
-            moves = [moves]
+            moves = (moves,)
 
         for move in moves:
             # Simulate move by updating temp_snake
@@ -394,7 +396,9 @@ class SnakeGame:
         return True
 
     def is_winning(self, moves):
-        """Function to check if a sequence of moves lead to the apple
+        """Function to check if a move or a sequence of moves leads to the apple
+
+        If a singular move is given as a string, it is put into a tuple
 
         NB! This function will not check for legal moves
 
@@ -406,7 +410,7 @@ class SnakeGame:
         temp_head = temp_snake[-1].copy()
 
         if isinstance(moves, str):
-            moves = [moves]
+            moves = (moves,)
 
         for move in moves:
 
