@@ -1,5 +1,6 @@
 import random
 import time
+import colorsys
 import pygame
 import numpy as np
 from pathlib import Path
@@ -31,6 +32,10 @@ class SnakeGame:
         self.display = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Snake")
 
+        self.main_layer = pygame.Surface((self.width, self.height))
+        self.search_layer = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.visited_nodes = {}
+
         self.clock = pygame.time.Clock()
 
         self.snake = None
@@ -53,6 +58,8 @@ class SnakeGame:
             "straight": pygame.image.load(f"{gfx_path}/straight.png").convert_alpha(),
             "tail": pygame.image.load(f"{gfx_path}/tail.png").convert_alpha(),
         }
+
+        self.square_font = pygame.font.SysFont(None, int(25 * self.sprite_size / 40))
 
         self._update_game_state()
 
@@ -99,7 +106,7 @@ class SnakeGame:
             image = self._get_sprite("head")
             image = pygame.transform.rotate(image, 90)
 
-        self.display.blit(image, snake_head)
+        self.main_layer.blit(image, snake_head)
 
         # Determine correct image for snake tail
         snake_tail = self.snake[0]
@@ -122,7 +129,7 @@ class SnakeGame:
             image = self._get_sprite("tail")
             image = pygame.transform.rotate(image, 90)
 
-        self.display.blit(image, snake_tail)
+        self.main_layer.blit(image, snake_tail)
 
         # Determine correct image for the body
         for i, seg in enumerate(self.snake[1:-1], 1):
@@ -168,24 +175,25 @@ class SnakeGame:
             else:
                 # Failsafe - probably won't happen
                 pygame.draw.rect(
-                    self.display,
+                    self.main_layer,
                     colors["green"],
                     [seg[0], seg[1], self.sprite_size, self.sprite_size],
                 )
                 return
 
-            self.display.blit(image, seg)
+            self.main_layer.blit(image, seg)
 
     def _draw_apple(self):
         """Helper function to draw apple on display"""
         image = self._get_sprite("apple")
-        self.display.blit(image, self.apple)
+        self.main_layer.blit(image, self.apple)
 
     def _update_display(self):
         """Helper function to update pygame display"""
-        self.display.fill(colors["white"])
+        self.main_layer.fill(colors["white"])
         self._draw_apple()
         self._draw_snake()
+        self.display.blit(self.main_layer, (0, 0))
         pygame.display.update()
         self._update_game_state()
 
@@ -253,6 +261,8 @@ class SnakeGame:
         if self.snake[-1] == self.apple:
             self.apple = self._get_random_position()
             self.snake_len += 1
+            self.visited_nodes.clear()
+            self.search_layer.fill((0, 0, 0, 0))
 
     def _check_collision_with_self(self):
         """Helper function to check if snake has eaten itself"""
@@ -503,3 +513,71 @@ class SnakeGame:
 
             self._update_display()
             self.clock.tick(config.CLOCK_SPEED)
+
+    def draw_square(self, pos, value=None, pause=False, color=None, draw_heatmap=False, show_visit_count=False, tick_limit=0):
+        """Helper function to draw a sprite sized square at a specified position.
+
+        :param pos: Position of the square that is to be drawn. The coordinates used are the grid coordinates.
+        :param value: Value to be written in the square. NB: Can be overwritten if other parameters are active.
+        :param pause: Wait for user input by pressing down a key before drawing the square.
+        :param color:  The color of the square. NB: Can be overwritten if other parameters are active.
+        :param draw_heatmap: Draw the square as a part of a heatmap based on the number of times the position has been used earlier with draw_heatmap or show_visit_count. NB: Will overwrite the color parameter.
+        :param show_visit_count: Draw the number of times the position has been used earlier with draw_heatmap or show_visit_count. NB: Will overwrite the value parameter.
+        :param tick_limit: Set the limit of how many times the function can be called each second by adding delay. If the limit is set to 0, it will run without delay.
+        """
+        if pause:
+            while True:
+                next_step = False
+                for event in pygame.event.get():
+                    self._check_quit_event(event)
+
+                    if event.type == pygame.KEYDOWN:
+                        next_step = True
+                if next_step:
+                    break
+
+        # Process events before drawing square
+        for event in pygame.event.get():
+            self._check_quit_event(event)
+
+        count = 0
+        # Decides if the number of times a position is visited gets counted
+        if draw_heatmap or show_visit_count:
+            pos = tuple(pos)
+            if pos not in self.visited_nodes:
+                self.visited_nodes[pos] = 1
+            else:
+                self.visited_nodes[pos] += 1
+            count = self.visited_nodes.get(pos, 0)
+
+        # Decides the color of the square
+        if color is not None and not draw_heatmap:
+            channel_count = len(color)
+            if channel_count == 3:
+                color = color + (160,)
+            elif channel_count == 4:
+                pass
+            else:
+                raise ValueError(f"The color is wrong. It should be of length 3 or 4. Got one of length: {len(color)}")
+        elif draw_heatmap:
+            hue = max((240 - count) / 360, 0)
+            color = tuple([int(i * 255) for i in colorsys.hls_to_rgb(hue, 0.3, 1)]) + (160,)
+        else:
+            color = (0, 0, 240, 160)
+
+        # Draw the square
+        square = pygame.Rect([pos[0] * self.sprite_size, pos[1] * self.sprite_size, self.sprite_size, self.sprite_size])
+        self.display.blit(self.main_layer, square.topleft, area=square)
+        pygame.draw.rect(self.search_layer, color, square)
+
+        # Render text in the drawn square
+        if value is not None or show_visit_count:
+            if show_visit_count:
+                value = str(count)
+            message = self.square_font.render(str(value), True, colors['black'])
+            message_rect = message.get_rect(center=square.center)
+            self.search_layer.blit(message, message_rect)
+
+        self.display.blit(self.search_layer, square.topleft, area=square)
+        pygame.display.update(square)
+        self.clock.tick(tick_limit)
