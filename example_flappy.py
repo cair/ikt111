@@ -7,7 +7,10 @@ import random
 MAX_LIFE = 1000
 
 # This sets the maximum population size
-MAX_POPULATION = 10
+MAX_POPULATION = 100
+
+# Initialize the environment with a set MAX_LIFE and MAX_POPULATION
+environment = Flappy(max_life=MAX_LIFE, max_population=MAX_POPULATION)
 
 
 def generate_random_force(_min=-4, _max=4):
@@ -23,40 +26,16 @@ def generate_random_force(_min=-4, _max=4):
     return [random.randint(_min, _max), random.randint(_min, _max)]
 
 
-game = Flappy(max_life=MAX_LIFE, max_population=MAX_POPULATION)
+# Probably some code/functions that can be implemented here
 
 
-@game.register_ai
+@environment.register_ai
 def super_ai(birds):
-    """A super AI function!
+    """A super AI function!"""
 
-    There is a 33% chance that:
-        1. A bird is replaced by a new, randomly generated one!
-        2. A bird has a random gene swapped with a new, randomly generated one!
-        3. A bird survives, without changes.
-    """
-
-    # Loop through the index of all birds
-    for i in range(len(birds)):
-
-        # Generate a random float in the interval [0, 1)
-        r = random.random()
-        if r < 0.33:
-            # Replace birds[i] with a new, random bird
-            birds[i] = Bird(max_life=MAX_LIFE)
-
-        elif r < 0.66:
-            # Generate a random integer in the interval [0, MAX_LIFE - 1]
-            r_i = random.randint(0, MAX_LIFE - 1)
-
-            # Replace a random gene in bird[i] with a new, random force vector
-            birds[i].genes[r_i] = generate_random_force()
-
-        else:
-            # Don't do anything!
-            pass
+    # Do some AI magic here, instead of just returning the same birds
 
     return birds
 
 
-game.start()
+environment.start()
