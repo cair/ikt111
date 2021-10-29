@@ -12,6 +12,7 @@ class Bird:
     def __init__(self, max_life: int = config.MAX_LIFE):
         self.fitness = 0
         self.alive = True
+        self.age = 0
         self.winner = False
         self.velocity = [0, 0]
         self.angle = config.START_ANGLE
@@ -50,6 +51,8 @@ class Bird:
             xp = point_radius * sin(angle)
             yp = point_radius * cos(angle)
             self.real_points.append((self.position[0] + xp, self.position[1] + yp))
+
+        self.age = i
 
     def _calculate_new_angle(self, new_position):
         """Calculate the directional angle of a bird based on current velocity vector"""
