@@ -1,4 +1,4 @@
-# Project Title
+# Snake
 
 A small implementation of 🐍 that can either be played by a human, or by an AI!  
 Developed as a supplement for IKT111, University of Agder.
